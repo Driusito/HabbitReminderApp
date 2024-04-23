@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
-import com.example.habbitreminderapp.Componentes.MainContent
+import com.example.habbitreminderapp.Features.MainContent
 import com.example.habbitreminderapp.Model.Configuracion
 import com.example.habbitreminderapp.Model.Inicio
 import com.example.habbitreminderapp.Model.MiPerfil

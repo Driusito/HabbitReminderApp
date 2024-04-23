@@ -1,4 +1,4 @@
-package com.example.habbitreminderapp.Componentes
+package com.example.habbitreminderapp.Features
 
 import android.annotation.SuppressLint
 import android.app.TimePickerDialog

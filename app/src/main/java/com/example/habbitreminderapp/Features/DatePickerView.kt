@@ -1,4 +1,4 @@
-package com.example.habbitreminderapp.Componentes
+package com.example.habbitreminderapp.Features
 
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults

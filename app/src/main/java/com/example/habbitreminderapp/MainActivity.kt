@@ -13,13 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.habbitreminderapp.Componentes.MainContent
+import com.example.habbitreminderapp.Features.Menu
 import com.example.habbitreminderapp.Model.Configuracion
 import com.example.habbitreminderapp.Model.Inicio
 import com.example.habbitreminderapp.Model.MiPerfil
 import com.example.habbitreminderapp.Model.MisMetas
 import com.example.habbitreminderapp.Model.NuevaMeta
-import com.example.habbitreminderapp.Model.Rutas
 import com.example.habbitreminderapp.Navigations.Screen1
 import com.example.habbitreminderapp.Navigations.Screen2
 import com.example.habbitreminderapp.Navigations.Screen3
@@ -39,7 +38,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
 
-                  val navigationController = rememberNavController()
+                 /* val navigationController = rememberNavController()
 
                     NavHost(navController = navigationController, startDestination = Inicio.ruta){
                         composable(Inicio.ruta) { Screen1(navigationController) }
@@ -47,7 +46,8 @@ class MainActivity : ComponentActivity() {
                         composable(NuevaMeta.ruta) { Screen3(navigationController) }
                         composable(MisMetas.ruta) { Screen4(navigationController) }
                         composable(Configuracion.ruta) { Screen5(navigationController) }
-                    }
+                    }*/
+                    Menu()
                 }
             }
         }
