@@ -43,14 +43,14 @@ fun BotonNuevoHabito() {
     var context = LocalContext.current
     IconButton(
         onClick = { Toast.makeText(context, "Nueva tarea", Toast.LENGTH_SHORT).show() },
-        modifier = Modifier.size(50.dp)
+        modifier = Modifier.size(100.dp)
     ) {
         Icon(
             imageVector = Icons.Filled.Add,
             contentDescription = "",
             tint = Color.White,
             modifier = Modifier
-                .size(50.dp)
+                .size(100.dp)
                 .clip(CircleShape)
                 .background(
                     Color(3, 169, 244, 255)

@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
-import com.example.habbitreminderapp.Features.MainContent
 import com.example.habbitreminderapp.Model.Configuracion
 import com.example.habbitreminderapp.Model.Inicio
 import com.example.habbitreminderapp.Model.MiPerfil
@@ -21,7 +20,6 @@ fun Screen1(navigationController: NavHostController) {
     Box(modifier = Modifier.clickable { navigationController.navigate(MiPerfil.ruta) }
         .fillMaxSize()
         .background(Color.Green)){
-        MainContent()
         Text(text = "Pantalla 1")
     }
 }
