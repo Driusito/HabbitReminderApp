@@ -6,8 +6,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.example.habbitreminderapp.Features.CustomCalendar
 
 @Composable
 fun MyCalendarFlat(){
-Box(modifier = Modifier.fillMaxSize().background(Color.Yellow))
+Box(modifier = Modifier
+    .fillMaxSize()
+    .background(Color.Yellow)){
+    CustomCalendar(numeroDelMes = 0)
+}
 }
