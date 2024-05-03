@@ -93,8 +93,8 @@ fun CustomCalendar(numeroDelMes: Int) {
                 for (colIndex in 0 until 7) {
                     val day = rowIndex * 7 + colIndex - startingDay + 1
                     //Si no empieza el mes, un "hueco", si no el day
-                    if ((colIndex < firstDayOfWeek - 2 && day < firstDayOfWeek - 2) && rowIndex == 0)
-                        EmptySpace(day = day) else
+                    if (((colIndex < firstDayOfWeek - 2 && day < firstDayOfWeek - 2) && rowIndex == 0) ||(firstDayOfWeek==1&& rowIndex == 0 && colIndex!=6) )
+                        EmptySpace(day) else
                         if (day in 1..daysInMonth) {
                             DayItem(day)
                         }
