@@ -6,8 +6,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.example.habbitreminderapp.Features.Pagina
+import com.example.habbitreminderapp.Features.TableScreen
 
 @Composable
 fun MyTaskTable(){
-    Box(modifier = Modifier.fillMaxSize().background(Color.Red))
+    Box(modifier = Modifier
+        .fillMaxSize()
+       ){
+        Pagina()
+    }
 }
