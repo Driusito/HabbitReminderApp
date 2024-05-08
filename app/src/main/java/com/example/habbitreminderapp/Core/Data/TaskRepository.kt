@@ -1,0 +1,44 @@
+package com.example.habbitreminderapp.Core.Data
+
+import com.example.habbitreminderapp.Database.Task.TaskDao
+import com.example.habbitreminderapp.Database.Task.TaskEntity
+import com.example.habbitreminderapp.Model.data.TaskModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class TaskRepository @Inject constructor(private val taskDao: TaskDao) {
+
+
+    val tasks: Flow<List<TaskModel>> = taskDao.getAllTask().map { items ->
+        items.map {
+            TaskModel(
+                it.id,
+                it.nombre,
+                it.color,
+                it.descripcion,
+                it.margen,
+                it.cumplida,
+                it.fechaId,
+                it.categoriaId
+            )
+        }
+    }
+
+    suspend fun addTask(taskModel: TaskModel) {
+        taskDao.addTask(
+            TaskEntity(
+                taskModel.id,
+                taskModel.nombre,
+                taskModel.color,
+                taskModel.descripcion,
+                taskModel.margen,
+                taskModel.cumplida,
+                taskModel.fechaId,
+                taskModel.categoriaId
+            )
+        )
+    }
+}

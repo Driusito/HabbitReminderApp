@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.habbitreminderapp.Features.Menu
+import com.example.habbitreminderapp.Core.Features.Menu
 import com.example.habbitreminderapp.Model.Configuracion
 import com.example.habbitreminderapp.Model.Inicio
 import com.example.habbitreminderapp.Model.MiPerfil
@@ -25,7 +25,9 @@ import com.example.habbitreminderapp.Navigations.Screen3
 import com.example.habbitreminderapp.Navigations.Screen4
 import com.example.habbitreminderapp.Navigations.Screen5
 import com.example.habbitreminderapp.ui.theme.HabbitReminderAppTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @SuppressLint("SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {

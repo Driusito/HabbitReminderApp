@@ -1,4 +1,4 @@
-package com.example.habbitreminderapp.Features
+package com.example.habbitreminderapp.Core.Features
 
 import android.util.Log
 import androidx.compose.foundation.layout.padding

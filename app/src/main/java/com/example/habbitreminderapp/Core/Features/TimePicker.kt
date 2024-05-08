@@ -1,4 +1,4 @@
-package com.example.habbitreminderapp.Features
+package com.example.habbitreminderapp.Core.Features
 
 import android.app.TimePickerDialog
 import androidx.compose.runtime.Composable

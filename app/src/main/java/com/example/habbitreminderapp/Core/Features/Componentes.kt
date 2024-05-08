@@ -1,4 +1,4 @@
-package com.example.habbitreminderapp.Features
+package com.example.habbitreminderapp.Core.Features
 
 import android.widget.Toast
 import androidx.compose.foundation.background

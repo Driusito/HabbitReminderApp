@@ -8,22 +8,23 @@ import androidx.room.PrimaryKey
 @Entity
 data class TaskEntity(
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "id_tarea")
-    val id:Int,
-    @ColumnInfo(name = "nombre_tarea")
-    val nombre:String,
-    @ColumnInfo(name = "color_tarea")
-    val color:Color,
-    @ColumnInfo(name = "descripcion_tarea")
-    val descripcion:String,
-    @ColumnInfo(name = "margen_tarea")
-    val margen:Long,
-    @ColumnInfo(name = "cumplida_tarea")
-    val cumplida:Int,
-    @ColumnInfo(name = "fechaId_tarea")
-    val fechaId:Int,
-    @ColumnInfo(name = "categoriaId_tarea")
-    val categoriaId:Int
+    var id:Int=0,
+    @ColumnInfo(name = "nombreTarea")
+    var nombre:String="",
+    @ColumnInfo(name = "colorTarea")
+    var color:String="",
+    @ColumnInfo(name = "descripcionTarea")
+    var descripcion:String="",
+    @ColumnInfo(name = "margenTarea")
+    var margen:Long=0L,
+    @ColumnInfo(name = "cumplidaTarea")
+    var cumplida:Int=0,
+    @ColumnInfo(name = "fechaIdTarea")
+    var fechaId:Int=0,
+    @ColumnInfo(name = "categoriaIdTarea")
+    var categoriaId:Int=0
 
 
-)
+){
+
+}

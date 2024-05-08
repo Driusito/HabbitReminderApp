@@ -41,8 +41,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.habbitreminderapp.Features.BotonConfirmar
-import com.example.habbitreminderapp.Features.MyCalendar
+import com.example.habbitreminderapp.Core.Features.BotonConfirmar
+import com.example.habbitreminderapp.Core.Features.MyCalendar
 
 
 @OptIn(ExperimentalMaterial3Api::class)
