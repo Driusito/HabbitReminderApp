@@ -1,6 +1,5 @@
 package com.example.habbitreminderapp.Database.Task
 
-import androidx.compose.ui.graphics.Color
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -23,8 +22,4 @@ data class TaskEntity(
     var fechaId:Int=0,
     @ColumnInfo(name = "categoriaIdTarea")
     var categoriaId:Int=0
-
-
-){
-
-}
+)

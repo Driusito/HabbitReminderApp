@@ -29,7 +29,7 @@ class DataBaseModule {
 
     @Provides
     fun provideTaskCategoryDao(habbitReminderDataBase: HabbitReminderDataBase):Task_CategoryDao{
-        return habbitReminderDataBase.task_categoryDao()
+        return habbitReminderDataBase.taskCategoryDao()
     }
     @Provides
     @Singleton
