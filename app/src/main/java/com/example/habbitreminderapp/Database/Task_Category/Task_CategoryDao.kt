@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface Task_CategoryDao {
     @Query("Select * from TAREA_CATEGORIA")
-    fun getAllTaskCategory(): Flow<List<Task_Category>>
+    fun getAllTaskCategory(): Flow<List<Task_Category_Entity>>
 
     @Insert
-    suspend fun addTask_Category(item: Task_Category)
+    suspend fun addTask_Category(item: Task_Category_Entity)
 }

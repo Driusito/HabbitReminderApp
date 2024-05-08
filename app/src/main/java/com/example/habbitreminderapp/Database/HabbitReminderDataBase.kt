@@ -6,7 +6,6 @@ import com.example.habbitreminderapp.Database.Category.CategoryDao
 import com.example.habbitreminderapp.Database.Category.CategoryEntity
 import com.example.habbitreminderapp.Database.Task.TaskDao
 import com.example.habbitreminderapp.Database.Task.TaskEntity
-import com.example.habbitreminderapp.Database.Task_Category.Task_Category
 import com.example.habbitreminderapp.Database.Task_Category.Task_CategoryDao
 import com.example.habbitreminderapp.Database.Task_Category.Task_Category_Entity
 
