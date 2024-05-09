@@ -1,9 +1,9 @@
 package com.example.habbitreminderapp.Database.Task
-
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.example.habbitreminderapp.Database.Task.TaskEntity
 import kotlinx.coroutines.flow.Flow
 
 
@@ -13,6 +13,8 @@ interface TaskDao {
     @Query("Select * from TaskEntity")
     fun getAllTask(): Flow<List<TaskEntity>>
 
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addTask(item:TaskEntity)
+    suspend fun  addTask(taskEntity: TaskEntity)
+
 }

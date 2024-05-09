@@ -9,7 +9,7 @@ import com.example.habbitreminderapp.Database.Task.TaskEntity
 import com.example.habbitreminderapp.Database.Task_Category.Task_CategoryDao
 import com.example.habbitreminderapp.Database.Task_Category.Task_Category_Entity
 
-@Database(entities = [TaskEntity::class, CategoryEntity::class,Task_Category_Entity::class], version = 1)
+@Database(entities = [TaskEntity::class, CategoryEntity::class,Task_Category_Entity::class], version = 10, exportSchema = false)
 abstract class HabbitReminderDataBase : RoomDatabase() {
     abstract fun taskDao():TaskDao
 

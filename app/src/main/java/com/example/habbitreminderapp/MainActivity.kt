@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -19,6 +20,8 @@ import com.example.habbitreminderapp.Model.Inicio
 import com.example.habbitreminderapp.Model.MiPerfil
 import com.example.habbitreminderapp.Model.MisMetas
 import com.example.habbitreminderapp.Model.NuevaMeta
+import com.example.habbitreminderapp.MyTasks.MyTaskScreens
+import com.example.habbitreminderapp.MyTasks.MyTaskTable.ui.MyTaskTableViewModel
 import com.example.habbitreminderapp.Navigations.Screen1
 import com.example.habbitreminderapp.Navigations.Screen2
 import com.example.habbitreminderapp.Navigations.Screen3
@@ -31,6 +34,9 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @SuppressLint("SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        val tasksViewModel:MyTaskTableViewModel by viewModels()
+
         super.onCreate(savedInstanceState)
         setContent {
             HabbitReminderAppTheme {
@@ -49,7 +55,7 @@ class MainActivity : ComponentActivity() {
                         composable(MisMetas.ruta) { Screen4(navigationController) }
                         composable(Configuracion.ruta) { Screen5(navigationController) }
                     }*/
-                    Menu()
+                  MyTaskScreens(myTaskTableViewModel = tasksViewModel)
                 }
             }
         }

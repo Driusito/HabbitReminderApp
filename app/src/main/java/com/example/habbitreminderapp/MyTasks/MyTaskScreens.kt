@@ -28,11 +28,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.habbitreminderapp.MyTasks.MyTaskCalendar.ui.MyCalendarFlat
 import com.example.habbitreminderapp.MyTasks.MyTaskTable.ui.MyTaskTable
+import com.example.habbitreminderapp.MyTasks.MyTaskTable.ui.MyTaskTableViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
-@Preview
 @Composable
-fun MyTaskScreens() {
+fun MyTaskScreens(myTaskTableViewModel: MyTaskTableViewModel) {
     val tabItems = listOf(
         TabItem(
             title = "Lista",

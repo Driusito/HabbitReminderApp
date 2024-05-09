@@ -2,6 +2,7 @@ package com.example.habbitreminderapp.Database.Task
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
 @Entity
