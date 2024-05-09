@@ -9,13 +9,17 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.AcUnit
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.outlined.ViewList
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,13 +30,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
 import com.example.habbitreminderapp.MyTasks.MyTaskCalendar.ui.MyCalendarFlat
 import com.example.habbitreminderapp.MyTasks.MyTaskTable.ui.MyTaskTable
 import com.example.habbitreminderapp.MyTasks.MyTaskTable.ui.MyTaskTableViewModel
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun MyTaskScreens(myTaskTableViewModel: MyTaskTableViewModel) {
+fun MyTaskScreens(myTaskTableViewModel: MyTaskTableViewModel, navController: NavController) {
     val tabItems = listOf(
         TabItem(
             title = "Lista",
@@ -57,6 +62,8 @@ fun MyTaskScreens(myTaskTableViewModel: MyTaskTableViewModel) {
         if (!pagerState.isScrollInProgress)
             selectedTabIndex = pagerState.currentPage
     }
+
+
 
     Column(Modifier.fillMaxSize()) {
         TabRow(selectedTabIndex = selectedTabIndex) {

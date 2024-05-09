@@ -41,15 +41,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.habbitreminderapp.Core.Features.BotonConfirmar
 import com.example.habbitreminderapp.Core.Features.MyCalendar
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Preview
 @Composable
-fun NewTaskScreen() {
+fun NewTaskScreen(navController: NavController) {
     var abrirCalendario by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize()) {
         TopAppBar(title = {
@@ -59,7 +59,7 @@ fun NewTaskScreen() {
                 fontWeight = FontWeight.Bold
             )
         }, navigationIcon = {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "",

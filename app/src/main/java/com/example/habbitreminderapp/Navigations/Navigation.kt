@@ -9,51 +9,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.habbitreminderapp.Model.Configuracion
 import com.example.habbitreminderapp.Model.Inicio
 import com.example.habbitreminderapp.Model.MiPerfil
 import com.example.habbitreminderapp.Model.MisMetas
 import com.example.habbitreminderapp.Model.NuevaMeta
+import com.example.habbitreminderapp.MyTasks.MyTaskScreens
+import com.example.habbitreminderapp.MyTasks.MyTaskTable.ui.MyTaskTableViewModel
+import com.example.habbitreminderapp.NewTaskView.ui.NewTaskScreen
+import com.example.habbitreminderapp.WelcomeView.ui.WelcomeScreen
+import javax.inject.Inject
 
 @Composable
-fun Screen1(navigationController: NavHostController) {
-    Box(modifier = Modifier.clickable { navigationController.navigate(MiPerfil.ruta) }
-        .fillMaxSize()
-        .background(Color.Green)){
-        Text(text = "Pantalla 1")
-    }
-}
-@Composable
-fun Screen2(navigationController: NavHostController) {
-    Box(modifier = Modifier.clickable { navigationController.navigate(NuevaMeta.ruta) }
-        .fillMaxSize()
-        .background(Color.Red)){
-        Text(text = "Pantalla 2")
-    }
-}
-@Composable
-fun Screen3(navigationController: NavHostController) {
-    Box(modifier = Modifier.clickable { navigationController.navigate(MisMetas.ruta) }
-        .fillMaxSize()
-        .background(Color.Cyan)){
-        Text(text = "Pantalla 3")
-    }
-}
-
-@Composable
-fun Screen4(navigationController: NavHostController) {
-    Box(modifier = Modifier.clickable { navigationController.navigate(Configuracion.ruta) }
-        .fillMaxSize()
-        .background(Color.Yellow)){
-        Text(text = "Pantalla 4")
-    }
-}
-
-@Composable
-fun Screen5(navigationController: NavHostController) {
-    Box(modifier = Modifier.clickable { navigationController.navigate(Inicio.ruta) }
-        .fillMaxSize()
-        .background(Color.Magenta)){
-        Text(text = "Pantalla 5")
+fun AppNavigation(myTaskTableViewModel: MyTaskTableViewModel){
+    val navController= rememberNavController()
+    NavHost(navController = navController, startDestination =AppScreen.welcomeScreen.route ){
+        composable(route=AppScreen.welcomeScreen.route){
+            WelcomeScreen(navController)
+        }
+        composable(route=AppScreen.newTaskScreen.route){
+            NewTaskScreen(navController)
+        }
+        composable(route=AppScreen.myTaskScreens.route){
+            MyTaskScreens(navController=navController, myTaskTableViewModel = myTaskTableViewModel)
+        }
     }
 }

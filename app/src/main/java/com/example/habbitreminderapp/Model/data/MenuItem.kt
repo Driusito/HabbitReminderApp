@@ -1,5 +1,6 @@
 package com.example.habbitreminderapp.Model.data
 
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 
 data class MenuItem(
@@ -7,4 +8,5 @@ data class MenuItem(
     val title:String,
     val contentDescription:String,
     val icon:ImageVector
+
 )

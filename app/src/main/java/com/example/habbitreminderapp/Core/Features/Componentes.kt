@@ -26,6 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.habbitreminderapp.Navigations.AppScreen
 import com.example.habbitreminderapp.ui.theme.HabbitReminderAppTheme
 
 
@@ -39,10 +41,10 @@ fun GreetingPreview() {
 }
 
 @Composable
-fun BotonNuevoHabito() {
+fun BotonNuevoHabito(navController: NavController) {
     var context = LocalContext.current
     IconButton(
-        onClick = { Toast.makeText(context, "Nueva tarea", Toast.LENGTH_SHORT).show() },
+        onClick = { navController.navigate(AppScreen.newTaskScreen.route) },
         modifier = Modifier.size(100.dp)
     ) {
         Icon(

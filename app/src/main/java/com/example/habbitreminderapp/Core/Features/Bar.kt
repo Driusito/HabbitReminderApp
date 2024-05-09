@@ -124,7 +124,7 @@ fun DrawerBody(
 
     }
 }
-
+/*
 @Preview
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -140,10 +140,10 @@ fun Menu() {
                 DrawerHeader()
                 DrawerBody(
                     items = listOf(
-                        MenuItem("0", "Inicio", "Inicio", icon = Icons.Default.Home),
-                        MenuItem("1", "Mi perfil", "Mi perfil", icon = Icons.Default.Face),
-                        MenuItem("2","Mis metas","Mis metas",Icons.Default.Settings),
-                        MenuItem("3","Mis metas","Mis metas",Icons.Default.Settings)
+                        MenuItem("0", "Inicio", "Inicio", icon = Icons.Default.Home,{}),
+                        MenuItem("1", "Mi perfil", "Mi perfil", icon = Icons.Default.Face,{}),
+                        MenuItem("2","Mis metas","Mis metas",Icons.Default.Settings,{}),
+                        MenuItem("3","Mis metas","Mis metas",Icons.Default.Settings,{})
 
 
                     ),
@@ -160,14 +160,14 @@ fun Menu() {
             },
             content = {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-                   BotonNuevoHabito()
+                   BotonNuevoHabito(navController = )
                 }
 
 
             }
         )
     }
-}
+}*/
 
 
 
