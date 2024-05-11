@@ -1,6 +1,7 @@
 package com.example.habbitreminderapp.Model.data
 
 import androidx.compose.ui.graphics.Color
+import java.util.Date
 
 
 data class TaskModel(
@@ -12,11 +13,14 @@ data class TaskModel(
 
     val descripcion: String,
 
+    val fecha:Long,
+
     val margen: Long,
+
+    val proximaFecha: Long,
 
     val cumplida: Int,
 
-    val fechaId: Int,
 
     val categoriaId: Int
 

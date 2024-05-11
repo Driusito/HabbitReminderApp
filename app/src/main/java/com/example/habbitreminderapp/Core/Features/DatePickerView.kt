@@ -10,56 +10,87 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-@Preview
+import com.example.habbitreminderapp.NewTaskView.ui.NewTaskScreenViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyCalendar() {
+fun MyCalendar(show:Boolean, newTaskScreenViewModel: NewTaskScreenViewModel): String {
     val state = rememberDatePickerState()
-    var mostrarCalendario by remember {
-        mutableStateOf(true)
-    }
-    var mostrarHora by remember {
-        mutableStateOf(false)
-    }
+    val showed: Boolean by newTaskScreenViewModel.openCalendar.observeAsState(initial = show)
+    var mostrarHora by remember { mutableStateOf(false) }
+    var hora by remember { mutableStateOf("") }
+    var fechaSeleccionada = ""
 
-    if (mostrarCalendario) {
-        DatePickerDialog( onDismissRequest = { mostrarCalendario = false
-                                            mostrarHora=false}, confirmButton = {
-            Button(onClick = {
-                mostrarCalendario = false
-                mostrarHora = true
-            }) {
-                Text(text = "Confirmar")
-
-
+    if (showed) {
+        DatePickerDialog(
+            onDismissRequest = {
+                mostrarHora = false
+                newTaskScreenViewModel.showCalendar(false)
+            },
+            confirmButton = {
+                Button(onClick = {
+                    mostrarHora = true
+                    // newTaskScreenViewModel.showCalendar(false)
+                }) {
+                    Text(text = "Confirmar")
+                }
             }
-        }) {
+        ) {
             DatePicker(
-                modifier = Modifier.padding(20.dp), headline = { Text(text = "Introduce fecha") },
+                modifier = Modifier.padding(20.dp),
+                headline = { Text(text = "Introduce fecha") },
                 title = null,
                 state = state,
                 colors = DatePickerDefaults.colors(
                     todayContentColor = Color.Green,
                     selectedDayContainerColor = Color(64, 141, 201, 255)
-
-
                 )
             )
         }
     }
-    if(mostrarHora){
-        MyTimePicker()
-        mostrarHora=false
+
+
+    if (mostrarHora) {
+        // Mostrar diálogo de selección de tiempo
+        MyTimePicker({ horaRetornada ->
+            // Callback para cuando se selecciona una hora
+            hora = horaRetornada
+            mostrarHora = false // Cerrar el diálogo después de seleccionar la hora
+
+            // Formatear la fecha como una cadena de texto
+            val selectedDateMillis = state.selectedDateMillis
+            val selectedDate = selectedDateMillis?.let { Date(it) }
+            val dateFormatter = SimpleDateFormat("dd/MM/yyyy")
+            fechaSeleccionada = selectedDate?.let { dateFormatter.format(it) } + " " + hora
+            Log.i("CalendarioSelected", fechaSeleccionada)
+            newTaskScreenViewModel.stringToLong(fechaSeleccionada)
+            newTaskScreenViewModel.showCalendar(false)
+
+        }, {
+            if (fechaSeleccionada.isNotEmpty()) {
+                Log.i("CalendarioYes", fechaSeleccionada)
+            }
+            newTaskScreenViewModel.showCalendar(false)
+            mostrarHora = false
+
+        }) {
+            mostrarHora = false
+            newTaskScreenViewModel.showCalendar(false)
+        }
 
     }
 
-
+    return fechaSeleccionada
 }
+

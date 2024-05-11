@@ -19,9 +19,10 @@ class TaskRepository @Inject constructor(private val taskDao: TaskDao) {
                 it.nombre,
                 it.color,
                 it.descripcion,
+                it.fecha,
                 it.margen,
+                it.proximaFecha,
                 it.cumplida,
-                it.fechaId,
                 it.categoriaId
             )
         }
@@ -34,9 +35,10 @@ class TaskRepository @Inject constructor(private val taskDao: TaskDao) {
                 taskModel.nombre,
                 taskModel.color,
                 taskModel.descripcion,
+                taskModel.fecha,
                 taskModel.margen,
+                taskModel.proximaFecha,
                 taskModel.cumplida,
-                taskModel.fechaId,
                 taskModel.categoriaId
             )
         )

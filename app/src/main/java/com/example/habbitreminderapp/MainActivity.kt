@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.Navigation
 import com.example.habbitreminderapp.MyTasks.MyTaskTable.ui.MyTaskTableViewModel
 import com.example.habbitreminderapp.Navigations.AppNavigation
+import com.example.habbitreminderapp.NewTaskView.ui.NewTaskScreenViewModel
 import com.example.habbitreminderapp.ui.theme.HabbitReminderAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -21,6 +22,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         val tasksViewModel:MyTaskTableViewModel by viewModels()
+        val newTaskScreenViewModel:NewTaskScreenViewModel by viewModels()
+
 
         super.onCreate(savedInstanceState)
         setContent {
@@ -30,7 +33,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation(tasksViewModel)
+                    AppNavigation(tasksViewModel,newTaskScreenViewModel)
                 }
             }
         }

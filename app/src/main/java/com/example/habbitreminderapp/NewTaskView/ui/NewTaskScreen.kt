@@ -1,6 +1,7 @@
 package com.example.habbitreminderapp.NewTaskView.ui
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -30,6 +31,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,8 +51,29 @@ import com.example.habbitreminderapp.Core.Features.MyCalendar
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun NewTaskScreen(navController: NavController) {
-    var abrirCalendario by remember { mutableStateOf(false) }
+fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskScreenViewModel) {
+
+    val nombreTarea: String by newTaskScreenViewModel.nameTask.observeAsState(initial = "")
+    val descripcionTarea: String by newTaskScreenViewModel.descriptionTask.observeAsState(initial = "")
+    val colorTarea: String by newTaskScreenViewModel.colorTask.observeAsState(initial = "")
+    val fechaTarea: String by newTaskScreenViewModel.fechaUi.observeAsState(initial = "")
+    val margenTarea: Long by newTaskScreenViewModel.marginTask.observeAsState(initial = 0L)
+    val cumplidaTarea: Int by newTaskScreenViewModel.doneTask.observeAsState(initial = 0)
+    var minutos by remember {
+        mutableStateOf("")
+    }
+    var horas by remember {
+        mutableStateOf("")
+    }
+    var dias by remember {
+        mutableStateOf("")
+    }
+
+
+    val abrirCalendario: Boolean by newTaskScreenViewModel.openCalendar.observeAsState(initial = false)
+
+    var fecha by remember { mutableStateOf("") }
+
     Column(Modifier.fillMaxSize()) {
         TopAppBar(title = {
             Text(
@@ -103,14 +126,16 @@ fun NewTaskScreen(navController: NavController) {
 
             Row(Modifier.fillMaxWidth()) {
                 OutlinedTextField(
-                    value = "", onValueChange = {}, modifier = Modifier.weight(
+                    value = nombreTarea,
+                    onValueChange = { newTaskScreenViewModel.onNameChanged(it) },
+                    modifier = Modifier.weight(
                         2f
                     )
                 )
                 Spacer(modifier = Modifier.weight(.25f))
 
                 Box(modifier = Modifier.weight(2f)) {
-                    MyDropDownMenu()
+                    (MyDropDownMenu())
                 }
 
 
@@ -130,7 +155,9 @@ fun NewTaskScreen(navController: NavController) {
             }
             Spacer(modifier = Modifier.weight(.25f))
             OutlinedTextField(
-                value = "", onValueChange = {}, modifier = Modifier.fillMaxWidth()
+                value = descripcionTarea,
+                onValueChange = { newTaskScreenViewModel.onDescriptionChanged(it) },
+                modifier = Modifier.fillMaxWidth()
 
             )
             Spacer(modifier = Modifier.weight(.25f))
@@ -168,7 +195,7 @@ fun NewTaskScreen(navController: NavController) {
             }
             Spacer(modifier = Modifier.weight(.25f))
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Button(onClick = { abrirCalendario = true }) {
+                Button(onClick = { newTaskScreenViewModel.showCalendar(true) }) {
                     Text(text = "Abrir Calendario")
 
                 }
@@ -176,12 +203,21 @@ fun NewTaskScreen(navController: NavController) {
             }
             Spacer(modifier = Modifier.weight(.25f))
 
-            Text(text = "Fecha seleccionada: ",fontSize = 20.sp, modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally))
+            Text(
+                text = "Fecha seleccionada: $fechaTarea ",
+                fontSize = 20.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+            )
 
             Spacer(modifier = Modifier.weight(.25f))
-            if (abrirCalendario) {
-                MyCalendar()
-            }
+
+
+            MyCalendar(abrirCalendario, newTaskScreenViewModel)
+
+
+
 
             Text(
                 text = "Recordatorio cada",
@@ -197,8 +233,14 @@ fun NewTaskScreen(navController: NavController) {
                 modifier = Modifier.padding(vertical = 10.dp)
             ) {
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = minutos,
+                    onValueChange = {
+                        minutos = it
+                        if (it.isNotEmpty())
+                            newTaskScreenViewModel.minToLong(it)
+                        Log.i("Rango minutos", it)
+
+                    },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
                 )
@@ -216,8 +258,13 @@ fun NewTaskScreen(navController: NavController) {
                 modifier = Modifier.padding(vertical = 10.dp)
             ) {
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = horas,
+                    onValueChange = {
+                        horas = it
+                        if (it.isNotEmpty())
+                            newTaskScreenViewModel.hourToLong(it)
+                        Log.i("Rango horas", it)
+                    },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
                 )
@@ -235,8 +282,14 @@ fun NewTaskScreen(navController: NavController) {
                 modifier = Modifier.padding(vertical = 10.dp)
             ) {
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = dias,
+                    onValueChange = {
+                        dias = it
+                        if (it.isNotEmpty())
+                            newTaskScreenViewModel.dayToLong(it)
+                        Log.i("Rango dias", it)
+
+                    },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
                 )
@@ -252,7 +305,7 @@ fun NewTaskScreen(navController: NavController) {
             Spacer(modifier = Modifier.weight(.25f))
 
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                BotonConfirmar()
+                BotonConfirmar { newTaskScreenViewModel.addTask() }
 
             }
 
@@ -263,7 +316,7 @@ fun NewTaskScreen(navController: NavController) {
 }
 
 @Composable
-fun MyDropDownMenu() {
+fun MyDropDownMenu(): String {
     var selectedText by remember { mutableStateOf("") }
     var clicked by remember { mutableStateOf(false) }
     val lista = listOf("Ejercicio", "Ocio", "Salud")
@@ -296,4 +349,5 @@ fun MyDropDownMenu() {
             })
         }
     }
+    return selectedText
 }

@@ -65,11 +65,11 @@ fun BotonNuevoHabito(navController: NavController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BotonConfirmar() {
+fun BotonConfirmar(createTask:()->Unit) {
     var context = LocalContext.current
 
     IconButton(
-        onClick = { Toast.makeText(context, "Confirmar", Toast.LENGTH_SHORT).show() },
+        onClick = { createTask() },
         modifier = Modifier.size(50.dp)
     ) {
         Icon(

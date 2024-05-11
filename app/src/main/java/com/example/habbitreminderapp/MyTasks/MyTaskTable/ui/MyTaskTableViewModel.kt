@@ -38,16 +38,7 @@ class MyTaskTableViewModel @Inject constructor(
     }
     fun addTask(){
         viewModelScope.launch {
-            addTaskUseCase(
-                TaskModel(  0,
-                    "nombre",
-                    "Rojo",
-                    "3gesfv",
-                    margen = 0L,
-                    cumplida = 1,
-                    categoriaId = 1,
-                    fechaId = 1)
-            )
+
 
         }
     }

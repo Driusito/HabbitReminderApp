@@ -20,18 +20,19 @@ import com.example.habbitreminderapp.Model.NuevaMeta
 import com.example.habbitreminderapp.MyTasks.MyTaskScreens
 import com.example.habbitreminderapp.MyTasks.MyTaskTable.ui.MyTaskTableViewModel
 import com.example.habbitreminderapp.NewTaskView.ui.NewTaskScreen
+import com.example.habbitreminderapp.NewTaskView.ui.NewTaskScreenViewModel
 import com.example.habbitreminderapp.WelcomeView.ui.WelcomeScreen
 import javax.inject.Inject
 
 @Composable
-fun AppNavigation(myTaskTableViewModel: MyTaskTableViewModel){
+fun AppNavigation(myTaskTableViewModel: MyTaskTableViewModel,newTaskScreenViewModel: NewTaskScreenViewModel){
     val navController= rememberNavController()
     NavHost(navController = navController, startDestination =AppScreen.welcomeScreen.route ){
         composable(route=AppScreen.welcomeScreen.route){
             WelcomeScreen(navController)
         }
         composable(route=AppScreen.newTaskScreen.route){
-            NewTaskScreen(navController)
+            NewTaskScreen(navController, newTaskScreenViewModel = newTaskScreenViewModel)
         }
         composable(route=AppScreen.myTaskScreens.route){
             MyTaskScreens(navController=navController, myTaskTableViewModel = myTaskTableViewModel)
