@@ -10,10 +10,6 @@ import com.example.habbitreminderapp.Core.Features.Pagina
 import com.example.habbitreminderapp.Core.Features.TableScreen
 
 @Composable
-fun MyTaskTable(){
-    Box(modifier = Modifier
-        .fillMaxSize().background(Color.White)
-       ){
-        Pagina()
-    }
+fun MyTaskTable(myTaskTableViewModel: MyTaskTableViewModel){
+
 }

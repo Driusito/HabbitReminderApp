@@ -13,6 +13,9 @@ interface TaskDao {
     @Query("Select * from TaskEntity")
     fun getAllTask(): Flow<List<TaskEntity>>
 
+    @Query("SELECT * FROM TaskEntity WHERE fechaTarea >= strftime('%s', date('now'))")
+    fun getTaskOfToday(): Flow<List<TaskEntity>>
+
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun  addTask(taskEntity: TaskEntity)

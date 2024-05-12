@@ -2,9 +2,6 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="CalendarView">
-        <State />
-      </entry>
       <entry key="MyTaskScreens">
         <State />
       </entry>
@@ -14,7 +11,7 @@
       <entry key="Pagina">
         <State />
       </entry>
-      <entry key="TableScreen">
+      <entry key="Pagina (1)">
         <State />
       </entry>
       <entry key="app">
@@ -32,6 +29,9 @@
           </targetSelectedWithDropDown>
           <timeTargetWasSelectedWithDropDown value="2024-05-02T16:13:59.533631800Z" />
         </State>
+      </entry>
+      <entry key="mostrarCategorias">
+        <State />
       </entry>
     </value>
   </component>

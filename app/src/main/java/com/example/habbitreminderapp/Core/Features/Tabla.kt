@@ -1,5 +1,7 @@
 package com.example.habbitreminderapp.Core.Features
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -23,10 +25,13 @@ import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.CropSquare
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.DoneOutline
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +41,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.habbitreminderapp.Model.data.TaskModel
+import com.example.habbitreminderapp.MyTasks.MyTaskTable.ui.MyTaskTableViewModel
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun TableScreen() {
@@ -69,6 +80,7 @@ fun TableScreen() {
         }
     }
 }
+
 
 @Composable
 fun Header() {
@@ -211,26 +223,48 @@ fun ItemListaPreview() {
     ) {
         Row(
             Modifier
-                .padding(20.dp)
-                .fillMaxWidth()
+                .padding(10.dp)
+                .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(10.dp)) {
-                Icon(imageVector = Icons.Default.CropSquare, contentDescription = "")
-            }
-            Box() {
+            Icon(
+                imageVector = Icons.Default.Face,
+                contentDescription = "",
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.weight(.5f))
+            Box(modifier = Modifier.weight(2.5f)) {
                 Column() {
-                    Text(text = "Nombre Tarea", color = Color.White)
-                    Text(text = "Hora de la tarea", color = Color(221, 89, 49, 255))
+                    Text(
+                        text = "Nombre Tarea",
+                        color = Color.White,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = "Hora de la tarea",
+                        color = Color(221, 89, 49, 255),
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
+            Spacer(modifier = Modifier.weight(.5f))
+
+            Box(
+                contentAlignment = Alignment.Center, modifier = Modifier
+                    .padding(10.dp)
+                    .weight(1f)
+            ) {
+                Icon(imageVector = Icons.Default.CropSquare, contentDescription = "")
+            }
+
 
         }
     }
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ItemLista(nombre: String) {
+fun ItemLista(taskModel: TaskModel) {
     Box(
         modifier = Modifier
             .padding(10.dp)
@@ -248,8 +282,16 @@ fun ItemLista(nombre: String) {
             }
             Box() {
                 Column() {
-                    Text(text = nombre, color = Color.White)
-                    Text(text = "Hora de la tarea", color = Color(218, 134, 7, 255))
+                    Text(text = taskModel.nombre, color = Color.White)
+                    val timestamp = taskModel.fecha // Tu valor long de fecha y hora
+                    val date = LocalDateTime.ofInstant(
+                        Instant.ofEpochMilli(timestamp),
+                        ZoneId.systemDefault()
+                    )
+                    val formatter =
+                        DateTimeFormatter.ofPattern("HH:mm") // Formato para mostrar solo la hora y los minutos
+                    val formattedTime = formatter.format(date)
+                    Text(text = formattedTime, color = Color(218, 134, 7, 255))
                 }
             }
 
@@ -257,15 +299,41 @@ fun ItemLista(nombre: String) {
     }
 }
 
-@Preview
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Pagina() {
-    var stateScrollState = rememberScrollState()
-    LazyColumn(content = {
-        itemsIndexed(listOf("Atrasados", "Hoy", "Mañana", "Esta semana")) { index, categoria ->
-            Text(text = categoria, modifier = Modifier.padding(20.dp))
-            ItemLista(nombre = "Tomar la pastilla")
-            ItemLista(nombre = "Sacar al perro")
-        }
-    })
+fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasks: List<TaskModel>) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        LazyColumn(content = {
+            itemsIndexed(listOf("Atrasados", "Hoy", "Mañana", "Esta semana")) { index, categoria ->
+                Text(text = categoria, modifier = Modifier.padding(20.dp))
+                when (categoria) {
+                    "Atrasados" -> {
+
+                    }
+
+                    "Hoy" -> {
+                        tasks.forEach { task ->
+                            ItemLista(taskModel = task)
+                        }
+
+
+                    }
+
+                    "Mañana" -> {
+
+                    }
+
+                    "Esta semana" -> {
+
+                    }
+                }
+            }
+        })
+    }
+
+
 }
