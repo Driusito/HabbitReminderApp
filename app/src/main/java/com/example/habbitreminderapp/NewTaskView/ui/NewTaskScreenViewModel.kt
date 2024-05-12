@@ -13,6 +13,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.util.TimeZone
 import javax.inject.Inject
 
 @HiltViewModel
@@ -65,10 +66,10 @@ class NewTaskScreenViewModel @Inject constructor(private val addTaskUseCase: Add
         _fechaUi.value=fechaString
         // Define el formato de fecha esperado
         val formato = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale("es", "ES")) // Para español de España
-
+        formato.timeZone = TimeZone.getTimeZone("UTC")
         try {
             // Parsea la cadena de fecha al formato especificado
-            val date = formato.parse(fechaString)?.time ?: 0L
+            val date = (formato.parse(fechaString)?.time?.div(1000)) ?: 0L
             Log.i("Calendario5", date.toString())
            _dateTask.value=date
         } catch (e: Exception) {

@@ -100,11 +100,19 @@ fun CustomCalendar(numeroDelMes: Int) {
         }
         //Hay que tener en cuenta que la cuenta se empieza desde el domingo
         //Y tambien empieza por 1, por lo que para que señale al lunes, deberia ser el 2
+Row (Modifier.fillMaxWidth()){
+    Box(modifier = Modifier
+        .size(50.dp)
+        .clickable { mes-- }
+        .background(Color.Red))
+    Spacer(modifier = Modifier.size(200.dp))
 
-        Box(modifier = Modifier
-            .size(50.dp)
-            .clickable { mes++ }
-            .background(Color.Red))
+    Box(modifier = Modifier
+        .size(50.dp)
+        .clickable { mes++ }
+        .background(Color.Blue))
+}
+
     }
 }
 @Composable
@@ -141,11 +149,13 @@ fun DayItem(
                 onDateSelected(selectedDate)
                 val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 val dateString = dateFormat.format(selectedDate)
-                Toast.makeText(
-                   context,
-                    "Fecha seleccionada: $dateString",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast
+                    .makeText(
+                        context,
+                        "Fecha seleccionada: $dateString",
+                        Toast.LENGTH_SHORT
+                    )
+                    .show()
 
             },
         contentAlignment = Alignment.Center
