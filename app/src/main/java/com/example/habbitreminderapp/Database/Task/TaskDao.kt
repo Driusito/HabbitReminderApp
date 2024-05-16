@@ -14,8 +14,14 @@ interface TaskDao {
     fun getAllTask(): Flow<List<TaskEntity>>
 
     @Query("SELECT * FROM TaskEntity WHERE fechaTarea >= (select strftime('%s', date('now')))" +
-            " and fechaTarea < (select strftime('%s', date('now', '+1 day')))")
+            " and fechaTarea < (select strftime('%s', date('now', '+1 day'))) and cumplidaTarea=0")
     fun getTaskOfToday(): Flow<List<TaskEntity>>
+
+    @Query("SELECT * FROM TaskEntity WHERE fechaTarea >= strftime('%s', date('now', '+1 day', 'localtime')) AND fechaTarea < strftime('%s', date('now', '+2 days', 'localtime'))and cumplidaTarea=0")
+    fun getTaskOfTomorrow(): Flow<List<TaskEntity>>
+
+    @Query("SELECT * FROM TaskEntity WHERE fechaTarea >= strftime('%s', date('now', '+2 day', 'localtime'))and cumplidaTarea=0")
+    fun getTaskComing(): Flow<List<TaskEntity>>
 
    	//1716206400
     //1715472000

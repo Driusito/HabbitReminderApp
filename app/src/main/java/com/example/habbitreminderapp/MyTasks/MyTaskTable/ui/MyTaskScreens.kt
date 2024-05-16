@@ -41,25 +41,46 @@ fun MyTaskScreens(myTaskTableViewModel: MyTaskTableViewModel, navController: Nav
 
     val lifeCycle = LocalLifecycleOwner.current.lifecycle
 
-    val uiState by produceState<MyTaskTableUiState>(
+    val uiStateToday by produceState<MyTaskTableUiState>(
         initialValue = MyTaskTableUiState.Loading,
         key1 = lifeCycle,
         key2 = myTaskTableViewModel
     ) {
         lifeCycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
-            myTaskTableViewModel.uiState.collect { value = it  }
+            myTaskTableViewModel.uiStateToday.collect { value = it }
         }
     }
-    when (uiState) {
-        is MyTaskTableUiState.Error -> {
-            Box(modifier = Modifier.fillMaxSize()){
-                Text(text = "fallo")
-            }}
+    val uiStateTomorrow by produceState<MyTaskTableUiState>(
+        initialValue = MyTaskTableUiState.Loading,
+        key1 = lifeCycle,
+        key2 = myTaskTableViewModel
+    ) {
+        lifeCycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
+            myTaskTableViewModel.uiStateTomorrow.collect { value = it }
+        }
+    }
+    val uiStateComing by produceState<MyTaskTableUiState>(
+        initialValue = MyTaskTableUiState.Loading,
+        key1 = lifeCycle,
+        key2 = myTaskTableViewModel
+    ) {
+        lifeCycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
+            myTaskTableViewModel.uiStateComing.collect { value = it }
+        }
+    }
 
-        MyTaskTableUiState.Loading -> {
-            CircularProgressIndicator()}
-        
-        is MyTaskTableUiState.Success -> {
+    when {
+        uiStateToday is MyTaskTableUiState.Error || uiStateTomorrow is MyTaskTableUiState.Error || uiStateComing is MyTaskTableUiState.Error -> {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Text(text = "Fallo de carga")
+            }
+        }
+
+        uiStateToday == MyTaskTableUiState.Loading || uiStateTomorrow == MyTaskTableUiState.Loading || uiStateComing == MyTaskTableUiState.Loading -> {
+            CircularProgressIndicator()
+        }
+
+        uiStateToday is MyTaskTableUiState.Success || uiStateTomorrow is MyTaskTableUiState.Success || uiStateComing is MyTaskTableUiState.Success -> {
             val tabItems = listOf(
                 TabItem(
                     title = "Lista",
@@ -111,7 +132,13 @@ fun MyTaskScreens(myTaskTableViewModel: MyTaskTableViewModel, navController: Nav
                 ) { page ->
                     when (page) {
                         //Cambiar aqui las pantallas
-                        0 -> Pagina(myTaskTableViewModel,(uiState as MyTaskTableUiState.Success).tasks)
+                        0 -> Pagina(
+                            myTaskTableViewModel,
+                            (uiStateToday as MyTaskTableUiState.Success).tasks,
+                            (uiStateTomorrow as MyTaskTableUiState.Success).tasks,
+                            (uiStateComing as MyTaskTableUiState.Success).tasks
+                        )
+
                         1 -> MyCalendarFlat()
                         else -> throw IllegalStateException("Invalid page index")
                     }
@@ -119,6 +146,9 @@ fun MyTaskScreens(myTaskTableViewModel: MyTaskTableViewModel, navController: Nav
             }
         }
     }
+
+
+
 }
 
 

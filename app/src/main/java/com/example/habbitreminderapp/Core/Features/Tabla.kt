@@ -301,7 +301,7 @@ fun ItemLista(taskModel: TaskModel) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasks: List<TaskModel>) {
+fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasks: List<TaskModel>,tasksTomorrow: List<TaskModel>,tasksComing: List<TaskModel>) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -324,11 +324,16 @@ fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasks: List<TaskModel>) {
                     }
 
                     "Mañana" -> {
+                        tasksTomorrow.forEach{task ->
+                            ItemLista(taskModel = task)
+                        }
 
                     }
 
                     "Esta semana" -> {
-
+                        tasksComing.forEach{task ->
+                            ItemLista(taskModel = task)
+                        }
                     }
                 }
             }

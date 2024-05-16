@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.habbitreminderapp.Domain.AddTaskUseCase
 import com.example.habbitreminderapp.Domain.GetTaskOfTodayUseCase
+import com.example.habbitreminderapp.Domain.GetTaskOfTomorrowUseCase
+import com.example.habbitreminderapp.Domain.GetTasksComing
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,13 +18,25 @@ import javax.inject.Inject
 @HiltViewModel
 class MyTaskTableViewModel @Inject constructor(
     private val addTaskUseCase: AddTaskUseCase, getTaskOfTodayUseCase: GetTaskOfTodayUseCase,
+    getTaskOfTomorrowUseCase: GetTaskOfTomorrowUseCase,
+    getTasksComing: GetTasksComing
 ) : ViewModel() {
 
 
 
 
 
-    val uiState: StateFlow<MyTaskTableUiState> = getTaskOfTodayUseCase().map(MyTaskTableUiState::Success)
+    val uiStateToday: StateFlow<MyTaskTableUiState> = getTaskOfTodayUseCase().map(MyTaskTableUiState::Success)
+        .catch { MyTaskTableUiState.Error(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MyTaskTableUiState.Loading)
+
+
+    val uiStateTomorrow: StateFlow<MyTaskTableUiState> = getTaskOfTomorrowUseCase().map(MyTaskTableUiState::Success)
+        .catch { MyTaskTableUiState.Error(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MyTaskTableUiState.Loading)
+
+
+    val uiStateComing: StateFlow<MyTaskTableUiState> = getTasksComing().map(MyTaskTableUiState::Success)
         .catch { MyTaskTableUiState.Error(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MyTaskTableUiState.Loading)
 
