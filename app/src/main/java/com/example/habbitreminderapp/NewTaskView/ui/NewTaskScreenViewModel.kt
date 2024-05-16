@@ -103,7 +103,7 @@ class NewTaskScreenViewModel @Inject constructor(private val addTaskUseCase: Add
             fecha = _dateTask.value ?: 0L,
             margen = _marginTask.value ?: 0L,
             proximaFecha = _dateTask.value!! + _marginTask.value!!,
-            cumplida = 1,
+            cumplida = 0,
             categoriaId = 1
         )
 
