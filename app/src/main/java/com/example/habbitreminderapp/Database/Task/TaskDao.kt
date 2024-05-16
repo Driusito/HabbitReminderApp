@@ -23,7 +23,11 @@ interface TaskDao {
     @Query("SELECT * FROM TaskEntity WHERE fechaTarea >= strftime('%s', date('now', '+2 day', 'localtime'))and cumplidaTarea=0")
     fun getTaskComing(): Flow<List<TaskEntity>>
 
-   	//1716206400
+    @Query("SELECT * FROM TaskEntity WHERE fechaTarea >= :startOfDay AND fechaTarea < :endOfDay AND cumplidaTarea = 0")
+    fun getTasksForDay(startOfDay: Long, endOfDay: Long): Flow<List<TaskEntity>>
+
+
+    //1716206400
     //1715472000
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun  addTask(taskEntity: TaskEntity)

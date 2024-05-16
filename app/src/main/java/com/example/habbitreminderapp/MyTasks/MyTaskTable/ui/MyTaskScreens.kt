@@ -32,7 +32,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import com.example.habbitreminderapp.Core.Features.Pagina
-import com.example.habbitreminderapp.MyTasks.MyTaskCalendar.ui.MyCalendarFlat
+import com.example.habbitreminderapp.MyTasks.MyTaskCalendar.ui.CustomCalendar
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -92,7 +92,7 @@ fun MyTaskScreens(myTaskTableViewModel: MyTaskTableViewModel, navController: Nav
                 )
             )
             val pantallas = listOf(
-                MyTaskTable(myTaskTableViewModel), MyCalendarFlat()
+                MyTaskTable(myTaskTableViewModel), CustomCalendar()
             )
             var selectedTabIndex by remember { mutableIntStateOf(0) }
             val pagerState = rememberPagerState { pantallas.size }
@@ -139,7 +139,7 @@ fun MyTaskScreens(myTaskTableViewModel: MyTaskTableViewModel, navController: Nav
                             (uiStateComing as MyTaskTableUiState.Success).tasks
                         )
 
-                        1 -> MyCalendarFlat()
+                        1 -> CustomCalendar()
                         else -> throw IllegalStateException("Invalid page index")
                     }
                 }

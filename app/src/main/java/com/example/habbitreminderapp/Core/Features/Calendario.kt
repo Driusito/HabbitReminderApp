@@ -5,6 +5,12 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,8 +20,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,9 +32,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun CustomCalendar(numeroDelMes: Int) {
-    var mes by remember { mutableStateOf(numeroDelMes) }
+fun CustomCalendar() {
+    var mes by remember { mutableStateOf(0) }
     var fechaSeleccionada by remember { mutableStateOf<Date?>(null) }
+
 
     val calendar = Calendar.getInstance().apply {
         set(Calendar.MONTH, mes)
@@ -34,39 +44,73 @@ fun CustomCalendar(numeroDelMes: Int) {
     val daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
     val firstDayOfMonth = calendar.apply { set(Calendar.DAY_OF_MONTH, 1) }
     val firstDayOfWeek = firstDayOfMonth.get(Calendar.DAY_OF_WEEK)
+    val year = firstDayOfMonth.get(Calendar.YEAR)
     val meses = listOf(
         "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
         "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
     )
-    val daysOfWeek = listOf("Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom")
+    val daysOfWeek = listOf("L", "M", "M", "J", "V", "S", "D")
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxHeight()
             .background(Color.White)
+            .padding(20.dp)
     ) {
         //Cabecera(mes)
-        Text(
-            text = meses[firstDayOfMonth.get(Calendar.MONTH)],
-            style = MaterialTheme.typography.displayMedium,
-            modifier = Modifier
+        Row(
+            Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            color = Color.Black
-        )
+                .padding(4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = meses[firstDayOfMonth.get(Calendar.MONTH)] + " $year",
+                style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier
+                    .padding(vertical = 8.dp),
+                color = Color.Black
+            )
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+
+
+                IconButton(onClick = { mes-- }) {
+                    Icon(
+                        modifier = Modifier
+                            .size(50.dp),
+                        imageVector = Icons.Default.ChevronLeft,
+                        contentDescription = "Mes anterior"
+                    )
+                }
+
+                IconButton(onClick = { mes++ }) {
+                    Icon(
+                        modifier = Modifier
+                            .size(50.dp),
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = "Mes anterior"
+                    )
+                }
+
+            }
+
+
+        }
+
+
 
         //Dias de la semana
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
+
+            ) {
             daysOfWeek.forEach { day ->
                 Text(
+                    textAlign = TextAlign.Center,
                     text = day,
+
                     fontSize = 20.sp,
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 4.dp),
+                        .padding(4.dp)
+                        .size(40.dp),
                     color = Color.Black
                 )
             }
@@ -85,12 +129,15 @@ fun CustomCalendar(numeroDelMes: Int) {
             ) {
                 //Hardcodeado para que muestre a partir del segundo día
                 //pero basta con que se consiga el primer día de la semana, del mes
+                // Hay que tener en cuenta que la cuenta se empieza desde el domingo
+                //Y tambien empieza por 1, por lo que para que señale al lunes, deberia ser el 2
                 for (colIndex in 0 until 7) {
                     val day = rowIndex * 7 + colIndex - startingDay + 1
                     //Si no empieza el mes, un "hueco", si no el day
                     if (((colIndex < firstDayOfWeek - 2 && day < firstDayOfWeek - 2) && rowIndex == 0) || (firstDayOfWeek == 1 && rowIndex == 0 && colIndex != 6))
-                        EmptySpace(        day
-                    ) else if (day in 1..daysInMonth) {
+                        EmptySpace(
+                            day
+                        ) else if (day in 1..daysInMonth) {
                         DayItem(day, mes, fechaSeleccionada) { fecha ->
                             fechaSeleccionada = fecha
                         }
@@ -98,35 +145,31 @@ fun CustomCalendar(numeroDelMes: Int) {
                 }
             }
         }
-        //Hay que tener en cuenta que la cuenta se empieza desde el domingo
-        //Y tambien empieza por 1, por lo que para que señale al lunes, deberia ser el 2
-Row (Modifier.fillMaxWidth()){
-    Box(modifier = Modifier
-        .size(50.dp)
-        .clickable { mes-- }
-        .background(Color.Red))
-    Spacer(modifier = Modifier.size(200.dp))
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start) {
 
-    Box(modifier = Modifier
-        .size(50.dp)
-        .clickable { mes++ }
-        .background(Color.Blue))
-}
+                Box(modifier = Modifier.background(Color.Red).fillMaxWidth().size(50.dp))
+
+        }
+
+
 
     }
+
 }
+
 @Composable
 fun EmptySpace(day: Int) {
     Box(
         modifier = Modifier
             .padding(4.dp)
-            .background(Color(100, 100, 100))
+            .background(Color(162, 221, 248, 255))
             .size(40.dp),
         contentAlignment = Alignment.Center
     ) {
 
     }
 }
+
 @Composable
 fun DayItem(
     day: Int,
@@ -139,11 +182,19 @@ fun DayItem(
         set(Calendar.DAY_OF_MONTH, day)
     }.time
 
-    val context= LocalContext.current
+    val context = LocalContext.current
     Box(
         modifier = Modifier
+            .clip(CutCornerShape(10.dp))
             .padding(4.dp)
-            .background(if (selectedDate == fechaSeleccionada) Color.Gray else Color.LightGray)
+            .background(
+                if (selectedDate == fechaSeleccionada) Color(63, 81, 181, 255) else Color(
+                    33,
+                    150,
+                    243,
+                    255
+                )
+            )
             .size(40.dp)
             .clickable {
                 onDateSelected(selectedDate)
@@ -162,8 +213,9 @@ fun DayItem(
     ) {
         Text(
             text = day.toString(),
-            color = Color.Black,
-            style = MaterialTheme.typography.headlineLarge
+            color = Color.White,
+            fontSize = 16.sp,
+            fontFamily = FontFamily.Monospace
         )
     }
 }
