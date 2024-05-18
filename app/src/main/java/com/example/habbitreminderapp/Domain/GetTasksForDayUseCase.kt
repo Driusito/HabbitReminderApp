@@ -12,5 +12,7 @@ class GetTasksForDayUseCase @Inject constructor(
     private val taskRepository: TaskRepository,
 
 ) {
-    operator fun invoke(startOfDay: Long, endOfDay: Long): Flow<List<TaskModel>> = taskRepository.getTaskForDay
+    operator fun invoke(startOfDay: Long, endOfDay: Long): Flow<List<TaskModel>>{
+        return taskRepository.getTaskForDay(startOfDay,endOfDay)
+    }
 }

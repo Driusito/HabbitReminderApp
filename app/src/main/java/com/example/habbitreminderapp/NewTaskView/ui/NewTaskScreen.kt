@@ -15,13 +15,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -195,10 +198,10 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
             }
             Spacer(modifier = Modifier.weight(.25f))
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Button(onClick = { newTaskScreenViewModel.showCalendar(true) }) {
-                    Text(text = "Abrir Calendario")
-
+                IconButton(onClick = {newTaskScreenViewModel.showCalendar(true) },Modifier.size(100.dp)) {
+                    Icon(imageVector = Icons.Default.CalendarMonth, contentDescription ="",Modifier.fillMaxSize() )
                 }
+
 
             }
             Spacer(modifier = Modifier.weight(.25f))
@@ -238,7 +241,7 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
                         minutos = it
                         if (it.isNotEmpty())
                             newTaskScreenViewModel.minToLong(it)
-                        Log.i("Rango minutos", it)
+
 
                     },
                     modifier = Modifier.weight(1f),
@@ -305,9 +308,14 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
             Spacer(modifier = Modifier.weight(.25f))
 
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                BotonConfirmar { newTaskScreenViewModel.addTask() }
+                FloatingActionButton(onClick = { newTaskScreenViewModel.addTask(minutos,horas, dias) }, modifier = Modifier.align(
+                    Alignment.BottomEnd)) {
+                    Icon(imageVector = Icons.Default.Done, contentDescription = "")
+
+                }
 
             }
+
 
         }
     }

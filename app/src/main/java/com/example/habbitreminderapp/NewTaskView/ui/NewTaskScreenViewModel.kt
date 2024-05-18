@@ -47,6 +47,8 @@ class NewTaskScreenViewModel @Inject constructor(private val addTaskUseCase: Add
     private var _openCalendar=MutableLiveData<Boolean>()
     val openCalendar:LiveData<Boolean> =_openCalendar
 
+
+
     fun showCalendar(show:Boolean){
         _openCalendar.value=show
     }
@@ -80,29 +82,49 @@ class NewTaskScreenViewModel @Inject constructor(private val addTaskUseCase: Add
         }
     }
 
-    fun minToLong(minutos:String){
-        _marginTask.value =0
-        _marginTask.value = _marginTask.value?.plus(minutos.toInt() * 60 * 1000L)
 
-    }
-    fun hourToLong(horas:String){
-        _marginTask.value =0
-        _marginTask.value = _marginTask.value?.plus(horas.toInt() * 60 * 60 * 1000L)
-    }
-    fun dayToLong(dias:String){
-        _marginTask.value =0
-        _marginTask.value = _marginTask.value?.plus(dias.toInt() * 24 * 60 * 60 * 1000L)
+
+    fun minToLong(minutosPar: String): Long {
+        if (minutosPar.isNotEmpty()) {
+            val minutos = minutosPar.toLongOrNull()
+            if (minutos != null) {
+                return minutos * 60
+            }
+        }
+        return 0
     }
 
-    fun addTask() {
+    fun hourToLong(horasPar: String): Long {
+        if (horasPar.isNotEmpty()) {
+            val horas = horasPar.toLongOrNull()
+            if (horas != null) {
+                return horas * 60 * 60
+            }
+        }
+        return 0
+    }
+
+    fun dayToLong(diasPar: String): Long {
+        if (diasPar.isNotEmpty()) {
+            val dias = diasPar.toLongOrNull()
+            if (dias != null) {
+                return dias * 24 * 60 * 60
+            }
+        }
+        return 0
+    }
+
+
+    fun addTask(minutos:String,horas: String,dias: String) {
+        val margen= (minToLong(minutos) + hourToLong(horas) + dayToLong(dias))
         _task.value = TaskModel(
             id = 0,
             nombre = _nameTask.value ?: "",
             color = "",
             descripcion = _descriptionTask.value ?: "",
             fecha = _dateTask.value ?: 0L,
-            margen = _marginTask.value ?: 0L,
-            proximaFecha = _dateTask.value!! + _marginTask.value!!,
+            margen = margen,
+            proximaFecha = _dateTask.value!! + margen,
             cumplida = 0,
             categoriaId = 1
         )
@@ -113,6 +135,10 @@ class NewTaskScreenViewModel @Inject constructor(private val addTaskUseCase: Add
             _task.value?.let { addTaskUseCase(it) }
 
         }
+
+        _nameTask.value=""
+        _descriptionTask.value=""
+        _fechaUi.value=""
 
     }
 }

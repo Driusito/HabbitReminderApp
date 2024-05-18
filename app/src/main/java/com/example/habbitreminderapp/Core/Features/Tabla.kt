@@ -9,29 +9,26 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.CropSquare
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.DoneOutline
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,9 +37,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.habbitreminderapp.Model.data.TaskModel
 import com.example.habbitreminderapp.MyTasks.MyTaskTable.ui.MyTaskTableViewModel
+import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -244,6 +241,7 @@ fun ItemListaPreview() {
                         color = Color(221, 89, 49, 255),
                         overflow = TextOverflow.Ellipsis
                     )
+                    Text(text = "Siguiente en: ")
                 }
             }
             Spacer(modifier = Modifier.weight(.5f))
@@ -264,7 +262,7 @@ fun ItemListaPreview() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ItemLista(taskModel: TaskModel) {
+fun ItemLista(taskModel: TaskModel,tipoFormato:Int) {
     Box(
         modifier = Modifier
             .padding(10.dp)
@@ -282,18 +280,37 @@ fun ItemLista(taskModel: TaskModel) {
             }
             Box() {
                 Column() {
+                    val fechaComienzo = taskModel.fecha
+                    val siguienteFecha = taskModel.proximaFecha
+
                     Text(text = taskModel.nombre, color = Color.White)
-                    val timestamp = taskModel.fecha // Tu valor long de fecha y hora
+                    val timestamp = taskModel.fecha * 1000 // Multiplica por 1000 para convertir segundos a milisegundos
                     val date = LocalDateTime.ofInstant(
                         Instant.ofEpochMilli(timestamp),
                         ZoneId.systemDefault()
                     )
-                    val formatter =
-                        DateTimeFormatter.ofPattern("HH:mm") // Formato para mostrar solo la hora y los minutos
+
+                    val formatter = if (tipoFormato == 0) {
+                        DateTimeFormatter.ofPattern("HH:mm")
+                    } else {
+                        DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+                    }
                     val formattedTime = formatter.format(date)
-                    Text(text = formattedTime, color = Color(218, 134, 7, 255))
+
+
+
+                    Text(text = "Inicio: $formattedTime", color = Color(238, 229, 217, 255))
+                    Text(
+                        text = "Siguiente fecha en: " + TimeDisplay(
+                            targetMilliseconds = taskModel.margen * 1000,
+                            startTime = fechaComienzo,
+                            endTime = siguienteFecha
+                        ),
+                        color = Color(218, 134, 7, 255)
+                    )
                 }
             }
+
 
         }
     }
@@ -308,7 +325,7 @@ fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasks: List<TaskModel>,ta
             .background(Color.White)
     ) {
         LazyColumn(content = {
-            itemsIndexed(listOf("Atrasados", "Hoy", "Mañana", "Esta semana")) { index, categoria ->
+            itemsIndexed(listOf("Atrasados", "Hoy", "Mañana", "Proximos")) { index, categoria ->
                 Text(text = categoria, modifier = Modifier.padding(20.dp))
                 when (categoria) {
                     "Atrasados" -> {
@@ -317,7 +334,7 @@ fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasks: List<TaskModel>,ta
 
                     "Hoy" -> {
                         tasks.forEach { task ->
-                            ItemLista(taskModel = task)
+                            ItemLista(taskModel = task,0)
                         }
 
 
@@ -325,14 +342,14 @@ fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasks: List<TaskModel>,ta
 
                     "Mañana" -> {
                         tasksTomorrow.forEach{task ->
-                            ItemLista(taskModel = task)
+                            ItemLista(taskModel = task,0)
                         }
 
                     }
 
-                    "Esta semana" -> {
+                    "Proximos" -> {
                         tasksComing.forEach{task ->
-                            ItemLista(taskModel = task)
+                            ItemLista(taskModel = task,1)
                         }
                     }
                 }
@@ -341,4 +358,36 @@ fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasks: List<TaskModel>,ta
     }
 
 
+}
+
+
+@Composable
+fun TimeDisplay(targetMilliseconds: Long, startTime: Long, endTime: Long): String {
+    // Estado para almacenar el tiempo restante
+    var remainingTime by remember { mutableStateOf(endTime - System.currentTimeMillis()) }
+
+    // LaunchedEffect para actualizar el tiempo cada segundo
+    LaunchedEffect(targetMilliseconds, startTime, endTime) {
+        while (remainingTime > 0) {
+            remainingTime = (endTime - System.currentTimeMillis()).coerceAtLeast(0L)
+            delay(1000L)  // Actualizar cada segundo
+        }
+    }
+
+    // Formatear el tiempo restante
+    val formattedTime = formatTime(remainingTime)
+
+    return formattedTime
+}
+
+fun formatTime(milliseconds: Long): String {
+    val totalSeconds = milliseconds / 1000
+    val seconds = totalSeconds % 60
+    val totalMinutes = totalSeconds / 60
+    val minutes = totalMinutes % 60
+    val totalHours = totalMinutes / 60
+    val hours = totalHours % 24
+    val days = totalHours / 24
+
+    return "${days} días, ${hours} horas, ${minutes} minutos y ${seconds} segundos"
 }

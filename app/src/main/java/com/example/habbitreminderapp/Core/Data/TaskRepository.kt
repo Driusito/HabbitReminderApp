@@ -75,21 +75,23 @@ class TaskRepository @Inject constructor(private val taskDao: TaskDao) {
         }
     }
 
-    val getTaskForDay: Flow<List<TaskModel>> = taskDao.getTasksForDay(0L,0L).map { items ->
-        items.map {
-            TaskModel(
-                it.id,
-                it.nombre,
-                it.color,
-                it.descripcion,
-                it.fecha,
-                it.margen,
-                it.proximaFecha,
-                it.cumplida,
-                it.categoriaId
-            )
+    fun getTaskForDay(startOfDay: Long, endOfDay: Long): Flow<List<TaskModel>> =
+        taskDao.getTasksForDay(startOfDay, endOfDay).map { items ->
+            items.map {
+                TaskModel(
+                    it.id,
+                    it.nombre,
+                    it.color,
+                    it.descripcion,
+                    it.fecha,
+                    it.margen,
+                    it.proximaFecha,
+                    it.cumplida,
+                    it.categoriaId
+                )
+            }
         }
-    }
+
 
     suspend fun addTask(taskModel: TaskModel) {
         taskDao.addTask(
