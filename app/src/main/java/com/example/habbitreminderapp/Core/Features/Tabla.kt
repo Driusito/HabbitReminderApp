@@ -44,6 +44,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeUnit
 
 @Composable
 fun TableScreen() {
@@ -287,8 +288,10 @@ fun ItemLista(taskModel: TaskModel,tipoFormato:Int) {
                     val timestamp = taskModel.fecha * 1000 // Multiplica por 1000 para convertir segundos a milisegundos
                     val date = LocalDateTime.ofInstant(
                         Instant.ofEpochMilli(timestamp),
-                        ZoneId.systemDefault()
+                        ZoneId.of("UTC")
                     )
+
+
 
                     val formatter = if (tipoFormato == 0) {
                         DateTimeFormatter.ofPattern("HH:mm")
@@ -301,12 +304,12 @@ fun ItemLista(taskModel: TaskModel,tipoFormato:Int) {
 
                     Text(text = "Inicio: $formattedTime", color = Color(238, 229, 217, 255))
                     Text(
-                        text = "Siguiente fecha en: " + TimeDisplay(
-                            targetMilliseconds = taskModel.margen * 1000,
-                            startTime = fechaComienzo,
-                            endTime = siguienteFecha
-                        ),
+                        text = "Siguiente fecha en: ",
                         color = Color(218, 134, 7, 255)
+                    )
+                    TimeDisplay(
+                        targetMilliseconds = taskModel.margen * 1000
+
                     )
                 }
             }
@@ -362,32 +365,45 @@ fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasks: List<TaskModel>,ta
 
 
 @Composable
-fun TimeDisplay(targetMilliseconds: Long, startTime: Long, endTime: Long): String {
-    // Estado para almacenar el tiempo restante
-    var remainingTime by remember { mutableStateOf(endTime - System.currentTimeMillis()) }
+fun TimeDisplay(targetMilliseconds: Long) {
+    // Calcular endTime sumando targetMilliseconds al tiempo actual del sistema
+    val endTime = System.currentTimeMillis() + targetMilliseconds
 
-    // LaunchedEffect para actualizar el tiempo cada segundo
-    LaunchedEffect(targetMilliseconds, startTime, endTime) {
+    var remainingTime by remember { mutableStateOf(targetMilliseconds) }
+
+    LaunchedEffect(key1 = endTime) {
         while (remainingTime > 0) {
-            remainingTime = (endTime - System.currentTimeMillis()).coerceAtLeast(0L)
-            delay(1000L)  // Actualizar cada segundo
+            delay(1000L)
+            remainingTime -= 1000L  // Reducir en 1 segundo cada vez que pasa un segundo
         }
     }
 
-    // Formatear el tiempo restante
-    val formattedTime = formatTime(remainingTime)
+    val days = TimeUnit.MILLISECONDS.toDays(remainingTime)
+    val hours = TimeUnit.MILLISECONDS.toHours(remainingTime) % 24
+    val minutes = TimeUnit.MILLISECONDS.toMinutes(remainingTime) % 60
+    val seconds = TimeUnit.MILLISECONDS.toSeconds(remainingTime) % 60
 
-    return formattedTime
+    val formattedTime = when {
+        days > 0 -> String.format("%d días, %02d horas, %02d minutos y %02d segundos", days, hours, minutes, seconds)
+        hours > 0 -> String.format("%02d horas, %02d minutos y %02d segundos", hours, minutes, seconds)
+        minutes > 0 -> String.format("%02d minutos y %02d segundos", minutes, seconds)
+        else -> String.format("%02d segundos", seconds)
+    }
+
+    Text(
+        text = if (remainingTime > 0) formattedTime else "Fin",
+        color = if (remainingTime > 0) Color.Green else Color.Red,
+        overflow = TextOverflow.Ellipsis
+    )
 }
 
-fun formatTime(milliseconds: Long): String {
-    val totalSeconds = milliseconds / 1000
-    val seconds = totalSeconds % 60
-    val totalMinutes = totalSeconds / 60
-    val minutes = totalMinutes % 60
-    val totalHours = totalMinutes / 60
-    val hours = totalHours % 24
-    val days = totalHours / 24
 
-    return "${days} días, ${hours} horas, ${minutes} minutos y ${seconds} segundos"
+
+fun formatTime(milliseconds: Long): String {
+    val days = TimeUnit.MILLISECONDS.toDays(milliseconds)
+    val hours = TimeUnit.MILLISECONDS.toHours(milliseconds) % 24
+    val minutes = TimeUnit.MILLISECONDS.toMinutes(milliseconds) % 60
+    val seconds = TimeUnit.MILLISECONDS.toSeconds(milliseconds) % 60
+
+    return String.format("%d días, %02d horas, %02d minutos y %02d segundos", days, hours, minutes, seconds)
 }
