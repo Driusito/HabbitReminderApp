@@ -1,24 +1,20 @@
 package com.example.habbitreminderapp.Core.Features
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.CropSquare
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.Icon
@@ -28,187 +24,28 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.habbitreminderapp.Model.data.TaskModel
 import com.example.habbitreminderapp.MyTasks.MyTaskTable.ui.MyTaskTableViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 
-@Composable
-fun TableScreen() {
-    // Just a fake data... a Pair of Int and String
-    val tableData = (1..100).mapIndexed { index, item ->
-        index to "Item $index"
-    }
-    // Each cell of a column must have the same weight.
-    val column1Weight = .3f // 30%
-    val column2Weight = .7f // 70%
-    // The LazyColumn will be our table. Notice the use of the weights below
-    LazyColumn(
-        Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // Here is the header
-        item {
-            Header()
-        }
-        // Here are all the lines of your table.
-        items(1) {
-            Fila(
-                nombre = "Pasear perro",
-                categoria = "Hogar",
-                fecha = "20/03/2024",
-                intervalo = "5 minutos",
-                completado = false
-            )
-
-        }
-    }
-}
 
 
-@Composable
-fun Header() {
-    Row(Modifier.background(Color.Gray)) {
-        Text(
-            text = "Nombre", textAlign = TextAlign.Center, modifier = Modifier
-                .border(
-                    1.dp,
-                    Color.Black
-                )
-                .weight(2.5f)
-        )
-        Text(
-            text = "Categoria", textAlign = TextAlign.Center, modifier = Modifier
-                .weight(2.5f)
-                .border(
-                    1.dp,
-                    Color.Black
-                )
-        )
-        Text(
-            maxLines = 1, text = "Fecha inicio", textAlign = TextAlign.Center, modifier = Modifier
-                .weight(2.5f)
-                .border(
-                    1.dp,
-                    Color.Black
-                )
-        )
-        Text(
-            text = "Intervalo", textAlign = TextAlign.Center, modifier = Modifier
-                .weight(2.5f)
-                .border(
-                    1.dp,
-                    Color.Black
-                )
-        )
-        Text(
-            maxLines = 1, text = "Completado", textAlign = TextAlign.Center, modifier = Modifier
-                .weight(3f)
-                .border(
-                    1.dp,
-                    Color.Black
-                )
-        )
 
-    }
-}
-
-@Composable
-fun Fila(nombre: String, categoria: String, fecha: String, intervalo: String, completado: Boolean) {
-    Row(Modifier.fillMaxWidth()) {
-        Text(
-            maxLines = 1, overflow = TextOverflow.Ellipsis,
-            text = nombre, textAlign = TextAlign.Center, modifier = Modifier
-                .border(
-                    1.dp,
-                    Color.Black
-                )
-                .weight(2.5f)
-        )
-        Text(
-            maxLines = 1, overflow = TextOverflow.Ellipsis,
-            text = categoria, textAlign = TextAlign.Center, modifier = Modifier
-                .border(
-                    1.dp,
-                    Color.Black
-                )
-                .weight(2.5f)
-        )
-        Text(
-            maxLines = 1, overflow = TextOverflow.Ellipsis,
-            text = fecha, textAlign = TextAlign.Center, modifier = Modifier
-                .border(
-                    1.dp,
-                    Color.Black
-                )
-                .weight(2.5f)
-        )
-        Text(
-            maxLines = 1, overflow = TextOverflow.Ellipsis,
-            text = intervalo, textAlign = TextAlign.Center, modifier = Modifier
-                .border(
-                    1.dp,
-                    Color.Black
-                )
-                .weight(2.5f)
-        )
-        if (completado)
-            Icon(
-                imageVector = Icons.Default.CheckCircle,
-                contentDescription = "",
-                modifier = Modifier
-                    .border(
-                        1.dp,
-                        Color.Black
-                    )
-                    .weight(3f)
-                    .size(19.dp)
-            )
-        else
-            Icon(
-                imageVector = Icons.Default.CheckCircleOutline,
-                contentDescription = "",
-                modifier = Modifier
-                    .border(
-                        1.dp,
-                        Color.Black
-                    )
-                    .weight(3f)
-                    .size(19.dp)
-            )
-
-
-    }
-
-}
-
-@Composable
-fun RowScope.TableCell(
-    text: String,
-    weight: Float
-) {
-    Text(
-        text = text,
-        Modifier
-            .border(1.dp, Color.Black)
-            .weight(weight)
-            .padding(8.dp)
-    )
-}
 
 @Preview
 @Composable
@@ -263,7 +100,7 @@ fun ItemListaPreview() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ItemLista(taskModel: TaskModel,tipoFormato:Int) {
+fun ItemLista(taskModel: TaskModel,tipoFormato:Int,setDone:()->Unit) {
     Box(
         modifier = Modifier
             .padding(10.dp)
@@ -307,10 +144,13 @@ fun ItemLista(taskModel: TaskModel,tipoFormato:Int) {
                         text = "Siguiente fecha en: ",
                         color = Color(218, 134, 7, 255)
                     )
-                    TimeDisplay(
+                    val tiempoRestante=TimeDisplay(
                         targetMilliseconds = taskModel.margen * 1000
 
                     )
+                    if (tiempoRestante<=0)
+                        setDone()
+
                 }
             }
 
@@ -321,13 +161,14 @@ fun ItemLista(taskModel: TaskModel,tipoFormato:Int) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasks: List<TaskModel>,tasksTomorrow: List<TaskModel>,tasksComing: List<TaskModel>) {
+fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasksToday: List<TaskModel>, tasksTomorrow: List<TaskModel>, tasksComing: List<TaskModel>) {
+    val coroutineScope = rememberCoroutineScope()
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
-        LazyColumn(content = {
+        LazyColumn {
             itemsIndexed(listOf("Atrasados", "Hoy", "Mañana", "Proximos")) { index, categoria ->
                 Text(text = categoria, modifier = Modifier.padding(20.dp))
                 when (categoria) {
@@ -336,28 +177,39 @@ fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasks: List<TaskModel>,ta
                     }
 
                     "Hoy" -> {
-                        tasks.forEach { task ->
-                            ItemLista(taskModel = task,0)
+                        tasksToday.forEach { task ->
+                            ItemLista(taskModel = task, tipoFormato = 0) {
+                                coroutineScope.launch {
+                                    myTaskTableViewModel.setDoneTask(task.id)
+                                }
+                            }
                         }
-
 
                     }
 
                     "Mañana" -> {
-                        tasksTomorrow.forEach{task ->
-                            ItemLista(taskModel = task,0)
+                        tasksTomorrow.forEach { task ->
+                            ItemLista(taskModel = task, tipoFormato = 0) {
+                                coroutineScope.launch {
+                                    myTaskTableViewModel.setDoneTask(task.id)
+                                }
+                            }
                         }
 
                     }
 
                     "Proximos" -> {
-                        tasksComing.forEach{task ->
-                            ItemLista(taskModel = task,1)
+                        tasksComing.forEach { task ->
+                            ItemLista(taskModel = task, tipoFormato = 1) {
+                                coroutineScope.launch {
+                                    myTaskTableViewModel.setDoneTask(task.id)
+                                }
+                            }
                         }
                     }
                 }
             }
-        })
+        }
     }
 
 
@@ -365,7 +217,7 @@ fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasks: List<TaskModel>,ta
 
 
 @Composable
-fun TimeDisplay(targetMilliseconds: Long) {
+fun TimeDisplay(targetMilliseconds: Long):Long {
     // Calcular endTime sumando targetMilliseconds al tiempo actual del sistema
     val endTime = System.currentTimeMillis() + targetMilliseconds
 
@@ -395,6 +247,7 @@ fun TimeDisplay(targetMilliseconds: Long) {
         color = if (remainingTime > 0) Color.Green else Color.Red,
         overflow = TextOverflow.Ellipsis
     )
+    return remainingTime
 }
 
 

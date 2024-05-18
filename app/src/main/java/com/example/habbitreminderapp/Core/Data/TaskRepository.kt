@@ -108,4 +108,9 @@ class TaskRepository @Inject constructor(private val taskDao: TaskDao) {
             )
         )
     }
+
+
+    suspend fun setTaskDone(id:Int) {
+        taskDao.setDone(id)
+    }
 }

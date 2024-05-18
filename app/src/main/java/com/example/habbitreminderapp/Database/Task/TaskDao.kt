@@ -13,18 +13,22 @@ interface TaskDao {
     @Query("Select * from TaskEntity")
     fun getAllTask(): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM TaskEntity WHERE fechaTarea >= (select strftime('%s', date('now')))" +
-            " and fechaTarea < (select strftime('%s', date('now', '+1 day'))) and cumplidaTarea=0")
-    fun getTaskOfToday(): Flow<List<TaskEntity>>
+    @Query("SELECT * FROM TaskEntity WHERE fechaTarea >= strftime('%s', 'now', 'localtime', 'start of day') " +
+            "AND fechaTarea < strftime('%s', 'now', 'localtime', 'start of day', '+1 day') " +
+            "AND cumplidaTarea=0")fun getTaskOfToday(): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM TaskEntity WHERE fechaTarea >= strftime('%s', date('now', '+1 day', 'localtime')) AND fechaTarea < strftime('%s', date('now', '+2 days', 'localtime'))and cumplidaTarea=0")
-    fun getTaskOfTomorrow(): Flow<List<TaskEntity>>
+    @Query("SELECT * FROM TaskEntity WHERE fechaTarea >= strftime('%s', 'now', 'localtime', 'start of day', '+1 day') " +
+            "AND fechaTarea < strftime('%s', 'now', 'localtime', 'start of day', '+2 day') " +
+            "AND cumplidaTarea=0")fun getTaskOfTomorrow(): Flow<List<TaskEntity>>
 
     @Query("SELECT * FROM TaskEntity WHERE fechaTarea >= strftime('%s', date('now', '+2 day', 'localtime'))and cumplidaTarea=0")
     fun getTaskComing(): Flow<List<TaskEntity>>
 
     @Query("SELECT * FROM TaskEntity WHERE fechaTarea >= :startOfDay AND fechaTarea < :endOfDay AND cumplidaTarea = 0")
     fun getTasksForDay(startOfDay: Long, endOfDay: Long): Flow<List<TaskEntity>>
+
+    @Query("UPDATE TaskEntity SET cumplidaTarea = 1 where id=:id")
+    fun setDone(id:Int)
 
 
     //1716206400

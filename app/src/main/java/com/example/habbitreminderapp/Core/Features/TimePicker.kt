@@ -1,6 +1,7 @@
 package com.example.habbitreminderapp.Core.Features
 
 import android.app.TimePickerDialog
+import android.content.DialogInterface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,5 +36,6 @@ fun MyTimePicker(onTimeSelected: (String) -> Unit, onYesClicked: () -> Unit, onN
             // Llamar a la función de devolución de llamada cuando se hace clic en "No"
             onNoClicked()
         }
+        setOnDismissListener { onNoClicked() }
     }.show()
 }
