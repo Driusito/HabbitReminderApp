@@ -100,7 +100,7 @@ fun ItemListaPreview() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ItemLista(taskModel: TaskModel,tipoFormato:Int,setDone:()->Unit) {
+fun ItemLista(taskModel: TaskModel, tipoFormato: Int, setDone: () -> Unit, newTask:() ->Unit) {
     Box(
         modifier = Modifier
             .padding(10.dp)
@@ -122,39 +122,48 @@ fun ItemLista(taskModel: TaskModel,tipoFormato:Int,setDone:()->Unit) {
                     val siguienteFecha = taskModel.proximaFecha
 
                     Text(text = taskModel.nombre, color = Color.White)
-                    val timestamp = taskModel.fecha * 1000 // Multiplica por 1000 para convertir segundos a milisegundos
+                    val timestamp = fechaComienzo * 1000 // Multiplica por 1000 para convertir segundos a milisegundos
                     val date = LocalDateTime.ofInstant(
                         Instant.ofEpochMilli(timestamp),
-                        ZoneId.of("UTC")
+                        ZoneId.systemDefault() // Usa la zona horaria del sistema
                     )
 
-
+                    val timestamp2 = siguienteFecha * 1000 // Multiplica por 1000 para convertir segundos a milisegundos
+                    val date2 = LocalDateTime.ofInstant(
+                        Instant.ofEpochMilli(timestamp2),
+                        ZoneId.systemDefault() // Usa la zona horaria del sistema
+                    )
 
                     val formatter = if (tipoFormato == 0) {
                         DateTimeFormatter.ofPattern("HH:mm")
                     } else {
                         DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
                     }
-                    val formattedTime = formatter.format(date)
-
-
+                    val formattedTime = date.format(formatter)
+                    val formattedTime2 = date2.format(formatter)
 
                     Text(text = "Inicio: $formattedTime", color = Color(238, 229, 217, 255))
-                    Text(
-                        text = "Siguiente fecha en: ",
-                        color = Color(218, 134, 7, 255)
-                    )
-                    val tiempoRestante=TimeDisplay(
-                        targetMilliseconds = taskModel.margen * 1000
+                    Text(text = "Próxima: $formattedTime2", color = Color(238, 229, 217, 255))
 
-                    )
-                    if (tiempoRestante<=0)
-                        setDone()
+                    val currentTime = System.currentTimeMillis()
 
+                    if (siguienteFecha  >= currentTime/1000) {  // Comprobar si la fecha de la tarea es mayor o igual a la hora actual
+                        Text(
+                            text = "Tiempo restante: ",
+                            color = Color(218, 134, 7, 255)
+                        )
+
+                        val tiempoRestante = TimeDisplay(
+                            targetTimeMilliseconds = siguienteFecha * 1000 // Multiplica por 1000 para convertir segundos a milisegundos
+                        )
+
+                        if (tiempoRestante <= 0){
+                            setDone()
+                            newTask()
+                        }
+                    }
                 }
             }
-
-
         }
     }
 }
@@ -178,18 +187,31 @@ fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasksToday: List<TaskMode
 
                     "Hoy" -> {
                         tasksToday.forEach { task ->
-                            ItemLista(taskModel = task, tipoFormato = 0) {
-                                coroutineScope.launch {
-                                    myTaskTableViewModel.setDoneTask(task.id)
+                            ItemLista(taskModel = task, tipoFormato = 0,
+                                newTask = {
+                                    val nuevaFecha = task.proximaFecha
+                                    val siguienteFecha = nuevaFecha + task.margen
+                                    val nuevaTarea = task.copy(
+                                        fecha = nuevaFecha,
+                                        proximaFecha = siguienteFecha
+                                    )
+                                    coroutineScope.launch {
+                                        myTaskTableViewModel.addTask(nuevaTarea)
+                                    }
+                                },
+                                setDone = {
+                                    coroutineScope.launch {
+                                        myTaskTableViewModel.setDoneTask(task.id)
+                                    }
                                 }
-                            }
+                            )
                         }
 
                     }
 
                     "Mañana" -> {
                         tasksTomorrow.forEach { task ->
-                            ItemLista(taskModel = task, tipoFormato = 0) {
+                            ItemLista(taskModel = task, tipoFormato = 0, setDone = {}) {
                                 coroutineScope.launch {
                                     myTaskTableViewModel.setDoneTask(task.id)
                                 }
@@ -200,7 +222,7 @@ fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasksToday: List<TaskMode
 
                     "Proximos" -> {
                         tasksComing.forEach { task ->
-                            ItemLista(taskModel = task, tipoFormato = 1) {
+                            ItemLista(taskModel = task, tipoFormato = 1, setDone = {}) {
                                 coroutineScope.launch {
                                     myTaskTableViewModel.setDoneTask(task.id)
                                 }
@@ -215,15 +237,12 @@ fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasksToday: List<TaskMode
 
 }
 
-
 @Composable
-fun TimeDisplay(targetMilliseconds: Long):Long {
-    // Calcular endTime sumando targetMilliseconds al tiempo actual del sistema
-    val endTime = System.currentTimeMillis() + targetMilliseconds
+fun TimeDisplay(targetTimeMilliseconds: Long): Long {
+    val currentTime = System.currentTimeMillis()  // Hora actual del dispositivo
+    var remainingTime by remember { mutableStateOf(targetTimeMilliseconds - currentTime) }
 
-    var remainingTime by remember { mutableStateOf(targetMilliseconds) }
-
-    LaunchedEffect(key1 = endTime) {
+    LaunchedEffect(key1 = targetTimeMilliseconds) {
         while (remainingTime > 0) {
             delay(1000L)
             remainingTime -= 1000L  // Reducir en 1 segundo cada vez que pasa un segundo
@@ -249,7 +268,6 @@ fun TimeDisplay(targetMilliseconds: Long):Long {
     )
     return remainingTime
 }
-
 
 
 fun formatTime(milliseconds: Long): String {

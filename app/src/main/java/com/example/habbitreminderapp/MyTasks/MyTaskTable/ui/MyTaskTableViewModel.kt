@@ -7,6 +7,7 @@ import com.example.habbitreminderapp.Domain.GetTaskOfTodayUseCase
 import com.example.habbitreminderapp.Domain.GetTaskOfTomorrowUseCase
 import com.example.habbitreminderapp.Domain.GetTasksComing
 import com.example.habbitreminderapp.Domain.SetDoneTaskUseCase
+import com.example.habbitreminderapp.Model.data.TaskModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -48,11 +49,13 @@ class MyTaskTableViewModel @Inject constructor(
     init {
 
     }
-    fun addTask(){
+    fun addTask(taskModel: TaskModel) {
         viewModelScope.launch {
 
+            addTaskUseCase(taskModel)
 
         }
+
     }
 
     suspend fun setDoneTask(id:Int){
