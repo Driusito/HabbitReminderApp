@@ -101,11 +101,12 @@ fun ItemListaPreview() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ItemLista(taskModel: TaskModel, tipoFormato: Int, setDone: () -> Unit, newTask:() ->Unit) {
+    val currentTime = System.currentTimeMillis()
     Box(
         modifier = Modifier
             .padding(10.dp)
             .clip(RoundedCornerShape(15.dp))
-            .background(Color(64, 110, 180, 255))
+            .background( if(taskModel.fecha<=currentTime/1000)Color(64, 110, 180, 255) else Color.Blue)
             .fillMaxWidth(.9f)
     ) {
         Row(
@@ -145,16 +146,18 @@ fun ItemLista(taskModel: TaskModel, tipoFormato: Int, setDone: () -> Unit, newTa
                     Text(text = "Inicio: $formattedTime", color = Color(238, 229, 217, 255))
                     Text(text = "Próxima: $formattedTime2", color = Color(238, 229, 217, 255))
 
-                    val currentTime = System.currentTimeMillis()
 
-                    if (siguienteFecha  >= currentTime/1000) {  // Comprobar si la fecha de la tarea es mayor o igual a la hora actual
+
+
+
+                    if (fechaComienzo  >= currentTime/1000) {  // Comprobar si la fecha de la tarea es mayor o igual a la hora actual
                         Text(
                             text = "Tiempo restante: ",
                             color = Color(218, 134, 7, 255)
                         )
 
                         val tiempoRestante = TimeDisplay(
-                            targetTimeMilliseconds = siguienteFecha * 1000 // Multiplica por 1000 para convertir segundos a milisegundos
+                            targetTimeMilliseconds = fechaComienzo * 1000 // Multiplica por 1000 para convertir segundos a milisegundos
                         )
 
                         if (tiempoRestante <= 0){
@@ -191,9 +194,14 @@ fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasksToday: List<TaskMode
                                 newTask = {
                                     val nuevaFecha = task.proximaFecha
                                     val siguienteFecha = nuevaFecha + task.margen
-                                    val nuevaTarea = task.copy(
+                                    val nuevaTarea = task.copy(id = task.id+1, nombre = task.nombre,
+                                        color = task.color,
+                                        descripcion = task.color,
                                         fecha = nuevaFecha,
-                                        proximaFecha = siguienteFecha
+                                        margen = task.margen,
+                                        proximaFecha = siguienteFecha,
+                                        cumplida = 0,
+                                        categoriaId = task.categoriaId
                                     )
                                     coroutineScope.launch {
                                         myTaskTableViewModel.addTask(nuevaTarea)

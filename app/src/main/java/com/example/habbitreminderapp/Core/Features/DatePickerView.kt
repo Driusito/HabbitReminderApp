@@ -55,7 +55,10 @@ fun MyCalendar(show:Boolean, newTaskScreenViewModel: NewTaskScreenViewModel): St
                 colors = DatePickerDefaults.colors(
                     todayContentColor = Color.Green,
                     selectedDayContainerColor = Color(64, 141, 201, 255)
-                )
+                ),
+                dateValidator = {date ->
+                    date > System.currentTimeMillis()- 86400000
+                }
             )
         }
     }
