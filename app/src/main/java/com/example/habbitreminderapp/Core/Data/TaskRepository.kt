@@ -92,6 +92,10 @@ class TaskRepository @Inject constructor(private val taskDao: TaskDao) {
             }
         }
 
+    fun getLastId():Int{
+        return taskDao.getNextId()
+    }
+
 
     suspend fun addTask(taskModel: TaskModel) {
         taskDao.addTask(

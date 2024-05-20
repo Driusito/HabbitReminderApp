@@ -100,13 +100,13 @@ fun ItemListaPreview() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ItemLista(taskModel: TaskModel, tipoFormato: Int, setDone: () -> Unit, newTask:() ->Unit) {
+fun ItemLista(taskModel: TaskModel, tipoFormato: Int, setDone: () -> Unit, newTask: suspend () -> Unit) {
     val currentTime = System.currentTimeMillis()
     Box(
         modifier = Modifier
             .padding(10.dp)
             .clip(RoundedCornerShape(15.dp))
-            .background( if(taskModel.fecha<=currentTime/1000)Color(64, 110, 180, 255) else Color.Blue)
+            .background(if (taskModel.fecha <= currentTime / 1000) Color(64, 110, 180, 255) else Color.Blue)
             .fillMaxWidth(.9f)
     ) {
         Row(
@@ -123,16 +123,16 @@ fun ItemLista(taskModel: TaskModel, tipoFormato: Int, setDone: () -> Unit, newTa
                     val siguienteFecha = taskModel.proximaFecha
 
                     Text(text = taskModel.nombre, color = Color.White)
-                    val timestamp = fechaComienzo * 1000 // Multiplica por 1000 para convertir segundos a milisegundos
+                    val timestamp = fechaComienzo * 1000
                     val date = LocalDateTime.ofInstant(
                         Instant.ofEpochMilli(timestamp),
-                        ZoneId.systemDefault() // Usa la zona horaria del sistema
+                        ZoneId.systemDefault()
                     )
 
-                    val timestamp2 = siguienteFecha * 1000 // Multiplica por 1000 para convertir segundos a milisegundos
+                    val timestamp2 = siguienteFecha * 1000
                     val date2 = LocalDateTime.ofInstant(
                         Instant.ofEpochMilli(timestamp2),
-                        ZoneId.systemDefault() // Usa la zona horaria del sistema
+                        ZoneId.systemDefault()
                     )
 
                     val formatter = if (tipoFormato == 0) {
@@ -146,23 +146,21 @@ fun ItemLista(taskModel: TaskModel, tipoFormato: Int, setDone: () -> Unit, newTa
                     Text(text = "Inicio: $formattedTime", color = Color(238, 229, 217, 255))
                     Text(text = "Próxima: $formattedTime2", color = Color(238, 229, 217, 255))
 
-
-
-
-
-                    if (fechaComienzo  >= currentTime/1000) {  // Comprobar si la fecha de la tarea es mayor o igual a la hora actual
+                    if (siguienteFecha >= currentTime / 1000) {
                         Text(
                             text = "Tiempo restante: ",
                             color = Color(218, 134, 7, 255)
                         )
 
                         val tiempoRestante = TimeDisplay(
-                            targetTimeMilliseconds = fechaComienzo * 1000 // Multiplica por 1000 para convertir segundos a milisegundos
+                            targetTimeMilliseconds = siguienteFecha * 1000
                         )
 
-                        if (tiempoRestante <= 0){
+                        if (tiempoRestante <= 0) {
                             setDone()
-                            newTask()
+                            LaunchedEffect(Unit) {
+                                newTask()
+                            }
                         }
                     }
                 }
@@ -171,9 +169,15 @@ fun ItemLista(taskModel: TaskModel, tipoFormato: Int, setDone: () -> Unit, newTa
     }
 }
 
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasksToday: List<TaskModel>, tasksTomorrow: List<TaskModel>, tasksComing: List<TaskModel>) {
+fun Pagina(
+    myTaskTableViewModel: MyTaskTableViewModel,
+    tasksToday: List<TaskModel>,
+    tasksTomorrow: List<TaskModel>,
+    tasksComing: List<TaskModel>
+) {
     val coroutineScope = rememberCoroutineScope()
     Box(
         modifier = Modifier
@@ -185,25 +189,27 @@ fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasksToday: List<TaskMode
                 Text(text = categoria, modifier = Modifier.padding(20.dp))
                 when (categoria) {
                     "Atrasados" -> {
-
+                        // ...
                     }
-
                     "Hoy" -> {
                         tasksToday.forEach { task ->
                             ItemLista(taskModel = task, tipoFormato = 0,
                                 newTask = {
-                                    val nuevaFecha = task.proximaFecha
-                                    val siguienteFecha = nuevaFecha + task.margen
-                                    val nuevaTarea = task.copy(id = task.id+1, nombre = task.nombre,
-                                        color = task.color,
-                                        descripcion = task.color,
-                                        fecha = nuevaFecha,
-                                        margen = task.margen,
-                                        proximaFecha = siguienteFecha,
-                                        cumplida = 0,
-                                        categoriaId = task.categoriaId
-                                    )
                                     coroutineScope.launch {
+                                        val lastId = myTaskTableViewModel.getLastID()
+                                        val nuevaFecha = task.proximaFecha
+                                        val siguienteFecha = nuevaFecha + task.margen
+                                        val nuevaTarea = task.copy(
+                                            id = lastId,
+                                            nombre = task.nombre,
+                                            color = task.color,
+                                            descripcion = task.descripcion,
+                                            fecha = nuevaFecha,
+                                            margen = task.margen,
+                                            proximaFecha = siguienteFecha,
+                                            cumplida = 0,
+                                            categoriaId = task.categoriaId
+                                        )
                                         myTaskTableViewModel.addTask(nuevaTarea)
                                     }
                                 },
@@ -214,9 +220,7 @@ fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasksToday: List<TaskMode
                                 }
                             )
                         }
-
                     }
-
                     "Mañana" -> {
                         tasksTomorrow.forEach { task ->
                             ItemLista(taskModel = task, tipoFormato = 0, setDone = {}) {
@@ -225,9 +229,7 @@ fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasksToday: List<TaskMode
                                 }
                             }
                         }
-
                     }
-
                     "Proximos" -> {
                         tasksComing.forEach { task ->
                             ItemLista(taskModel = task, tipoFormato = 1, setDone = {}) {
@@ -241,8 +243,6 @@ fun Pagina(myTaskTableViewModel: MyTaskTableViewModel, tasksToday: List<TaskMode
             }
         }
     }
-
-
 }
 
 @Composable

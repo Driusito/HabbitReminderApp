@@ -3,6 +3,7 @@ package com.example.habbitreminderapp.MyTasks.MyTaskTable.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.habbitreminderapp.Domain.AddTaskUseCase
+import com.example.habbitreminderapp.Domain.GetLastIdUseCase
 import com.example.habbitreminderapp.Domain.GetTaskOfTodayUseCase
 import com.example.habbitreminderapp.Domain.GetTaskOfTomorrowUseCase
 import com.example.habbitreminderapp.Domain.GetTasksComing
@@ -16,13 +17,14 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class MyTaskTableViewModel @Inject constructor(
     private val addTaskUseCase: AddTaskUseCase, getTaskOfTodayUseCase: GetTaskOfTodayUseCase,
     getTaskOfTomorrowUseCase: GetTaskOfTomorrowUseCase,
-    getTasksComing: GetTasksComing,var setDoneTaskUseCase: SetDoneTaskUseCase
+    getTasksComing: GetTasksComing,var setDoneTaskUseCase: SetDoneTaskUseCase,val getLastIdUseCase: GetLastIdUseCase
 ) : ViewModel() {
 
 
@@ -44,7 +46,11 @@ class MyTaskTableViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MyTaskTableUiState.Loading)
 
 
-
+    suspend fun getLastID(): Int {
+        return withContext(Dispatchers.IO) {
+            getLastIdUseCase()
+        }
+    }
 
     init {
 

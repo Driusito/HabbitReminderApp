@@ -30,6 +30,9 @@ interface TaskDao {
     @Query("UPDATE TaskEntity SET cumplidaTarea = 1 where id=:id")
     fun setDone(id:Int)
 
+    @Query("Select Max(id)+1 from TaskEntity")
+    fun getNextId():Int
+
 
     //1716206400
     //1715472000
