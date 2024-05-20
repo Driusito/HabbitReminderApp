@@ -52,23 +52,16 @@ class MyTaskTableViewModel @Inject constructor(
         }
     }
 
-    init {
-
-    }
     fun addTask(taskModel: TaskModel) {
-        viewModelScope.launch {
-
+        viewModelScope.launch(Dispatchers.IO) {
             addTaskUseCase(taskModel)
-
         }
-
     }
 
-    suspend fun setDoneTask(id:Int){
-        viewModelScope.launch(Dispatchers.IO){
+    fun setDoneTask(id: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
             setDoneTaskUseCase(id)
         }
-
     }
 
 

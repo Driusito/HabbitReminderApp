@@ -20,6 +20,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.produceState
@@ -38,56 +39,31 @@ import com.example.habbitreminderapp.MyTasks.MyTaskCalendar.ui.MyTaskCalendarVie
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun MyTaskScreens(myTaskTableViewModel: MyTaskTableViewModel,myTaskCalendarViewModel: MyTaskCalendarViewModel, navController: NavController) {
-
-    val lifeCycle = LocalLifecycleOwner.current.lifecycle
-
-    val uiStateToday by produceState<MyTaskTableUiState>(
-        initialValue = MyTaskTableUiState.Loading,
-        key1 = lifeCycle,
-        key2 = myTaskTableViewModel
-    ) {
-        lifeCycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
-            myTaskTableViewModel.uiStateToday.collect { value = it }
-        }
-    }
-    val uiStateTomorrow by produceState<MyTaskTableUiState>(
-        initialValue = MyTaskTableUiState.Loading,
-        key1 = lifeCycle,
-        key2 = myTaskTableViewModel
-    ) {
-        lifeCycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
-            myTaskTableViewModel.uiStateTomorrow.collect { value = it }
-        }
-    }
-    val uiStateComing by produceState<MyTaskTableUiState>(
-        initialValue = MyTaskTableUiState.Loading,
-        key1 = lifeCycle,
-        key2 = myTaskTableViewModel
-    ) {
-        lifeCycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
-            myTaskTableViewModel.uiStateComing.collect { value = it }
-        }
-    }
+fun MyTaskScreens(
+    myTaskTableViewModel: MyTaskTableViewModel,
+    myTaskCalendarViewModel: MyTaskCalendarViewModel,
+    navController: NavController
+) {
+    val uiStateToday by myTaskTableViewModel.uiStateToday.collectAsState()
+    val uiStateTomorrow by myTaskTableViewModel.uiStateTomorrow.collectAsState()
+    val uiStateComing by myTaskTableViewModel.uiStateComing.collectAsState()
 
     when {
-        uiStateToday is MyTaskTableUiState.Error || uiStateTomorrow is MyTaskTableUiState.Error || uiStateComing is MyTaskTableUiState.Error -> {
+        uiStateToday is MyTaskTableUiState.Error ||
+                uiStateTomorrow is MyTaskTableUiState.Error ||
+                uiStateComing is MyTaskTableUiState.Error -> {
             Box(modifier = Modifier.fillMaxSize()) {
                 Text(text = "Fallo de carga")
             }
         }
-
-        uiStateToday == MyTaskTableUiState.Loading || uiStateTomorrow == MyTaskTableUiState.Loading || uiStateComing == MyTaskTableUiState.Loading -> {
+        uiStateToday == MyTaskTableUiState.Loading ||
+                uiStateTomorrow == MyTaskTableUiState.Loading ||
+                uiStateComing == MyTaskTableUiState.Loading -> {
             CircularProgressIndicator()
         }
-
-        uiStateToday is MyTaskTableUiState.Success || uiStateTomorrow is MyTaskTableUiState.Success || uiStateComing is MyTaskTableUiState.Success -> {
-
-
-
-
-
-
+        uiStateToday is MyTaskTableUiState.Success ||
+                uiStateTomorrow is MyTaskTableUiState.Success ||
+                uiStateComing is MyTaskTableUiState.Success -> {
             val tabItems = listOf(
                 TabItem(
                     title = "Lista",
@@ -99,7 +75,13 @@ fun MyTaskScreens(myTaskTableViewModel: MyTaskTableViewModel,myTaskCalendarViewM
                 )
             )
             val pantallas = listOf(
-                MyTaskTable(myTaskTableViewModel), CustomCalendar(myTaskCalendarViewModel)
+                Pagina(
+                    myTaskTableViewModel,
+                    (uiStateToday as MyTaskTableUiState.Success).tasks,
+                    (uiStateTomorrow as MyTaskTableUiState.Success).tasks,
+                    (uiStateComing as MyTaskTableUiState.Success).tasks
+                ),
+                CustomCalendar(myTaskCalendarViewModel)
             )
             var selectedTabIndex by remember { mutableIntStateOf(0) }
             val pagerState = rememberPagerState { pantallas.size }
@@ -109,11 +91,10 @@ fun MyTaskScreens(myTaskTableViewModel: MyTaskTableViewModel,myTaskCalendarViewM
             }
 
             LaunchedEffect(pagerState.currentPage, pagerState.isScrollInProgress) {
-                if (!pagerState.isScrollInProgress)
+                if (!pagerState.isScrollInProgress) {
                     selectedTabIndex = pagerState.currentPage
+                }
             }
-
-
 
             Column(Modifier.fillMaxSize()) {
                 TabRow(selectedTabIndex = selectedTabIndex) {
@@ -138,14 +119,12 @@ fun MyTaskScreens(myTaskTableViewModel: MyTaskTableViewModel,myTaskCalendarViewM
                         .weight(1f)
                 ) { page ->
                     when (page) {
-                        //Cambiar aqui las pantallas
                         0 -> Pagina(
                             myTaskTableViewModel,
                             (uiStateToday as MyTaskTableUiState.Success).tasks,
                             (uiStateTomorrow as MyTaskTableUiState.Success).tasks,
                             (uiStateComing as MyTaskTableUiState.Success).tasks
                         )
-
                         1 -> CustomCalendar(myTaskCalendarViewModel)
                         else -> throw IllegalStateException("Invalid page index")
                     }
@@ -153,10 +132,8 @@ fun MyTaskScreens(myTaskTableViewModel: MyTaskTableViewModel,myTaskCalendarViewM
             }
         }
     }
-
-
-
 }
+
 
 
 data class TabItem(val title: String, val selectedIcon: ImageVector)

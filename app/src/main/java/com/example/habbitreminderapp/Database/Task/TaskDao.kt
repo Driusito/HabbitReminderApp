@@ -3,6 +3,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.habbitreminderapp.Database.Task.TaskEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -34,8 +35,7 @@ interface TaskDao {
     fun getNextId():Int
 
 
-    //1716206400
-    //1715472000
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun  addTask(taskEntity: TaskEntity)
 
