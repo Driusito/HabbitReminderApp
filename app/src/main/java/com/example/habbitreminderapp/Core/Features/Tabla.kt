@@ -64,7 +64,7 @@ fun ItemListaPreview(taskModel: TaskModel, viewModel: MyTaskTableViewModel,tipoF
             .padding(10.dp)
             .clickable {
                 val currentTimestampSeconds = currentTime / 1000
-                if (currentTimestampSeconds >= taskModel.fecha) {
+                if (currentTimestampSeconds >= taskModel.fecha &&currentTimestampSeconds <= taskModel.proximaFecha) {
                     coroutineScope.launch {
                         viewModel.setDoneTask(taskModel.id)
                         val lastID = viewModel.getLastID()

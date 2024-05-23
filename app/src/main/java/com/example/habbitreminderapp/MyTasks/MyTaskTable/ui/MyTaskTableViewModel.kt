@@ -8,6 +8,7 @@ import com.example.habbitreminderapp.Domain.GetTaskOfTodayUseCase
 import com.example.habbitreminderapp.Domain.GetTaskOfTomorrowUseCase
 import com.example.habbitreminderapp.Domain.GetTasksComing
 import com.example.habbitreminderapp.Domain.SetDoneTaskUseCase
+import com.example.habbitreminderapp.Domain.SetOverdueTaskUseCase
 import com.example.habbitreminderapp.Model.data.TaskModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +25,10 @@ import javax.inject.Inject
 class MyTaskTableViewModel @Inject constructor(
     private val addTaskUseCase: AddTaskUseCase, getTaskOfTodayUseCase: GetTaskOfTodayUseCase,
     getTaskOfTomorrowUseCase: GetTaskOfTomorrowUseCase,
-    getTasksComing: GetTasksComing,var setDoneTaskUseCase: SetDoneTaskUseCase,val getLastIdUseCase: GetLastIdUseCase
+    getTasksComing: GetTasksComing,
+    var setDoneTaskUseCase: SetDoneTaskUseCase,
+    val getLastIdUseCase: GetLastIdUseCase,
+    val setOverdueTaskUseCase: SetOverdueTaskUseCase
 ) : ViewModel() {
 
 
@@ -62,6 +66,10 @@ class MyTaskTableViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             setDoneTaskUseCase(id)
         }
+    }
+
+    suspend fun setOverDueTasks(){
+        setOverdueTaskUseCase()
     }
 
 

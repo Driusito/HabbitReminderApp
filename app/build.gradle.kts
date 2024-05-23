@@ -85,5 +85,9 @@ dependencies {
     //LiveData
     implementation("androidx.compose.runtime:runtime-livedata:1.6.7")
 
+    //Emojis
+    //implementation ("com.vanniktech:emoji-twitter:0.7.0")
+
+
 
 }

@@ -1,5 +1,6 @@
 package com.example.habbitreminderapp.Core.Data
 
+import android.util.Log
 import com.example.habbitreminderapp.Database.Task.TaskDao
 import com.example.habbitreminderapp.Database.Task.TaskEntity
 import com.example.habbitreminderapp.Model.data.TaskModel
@@ -96,6 +97,11 @@ class TaskRepository @Inject constructor(private val taskDao: TaskDao) {
         return taskDao.getNextId()
     }
 
+    suspend fun updateOverdueTasks(){
+        val endOfDay = System.currentTimeMillis()*1000
+        Log.i("mimo",endOfDay.toString())
+        taskDao.updateOverdueTasks(endOfDay)
+    }
 
     suspend fun addTask(taskModel: TaskModel) {
         taskDao.addTask(
