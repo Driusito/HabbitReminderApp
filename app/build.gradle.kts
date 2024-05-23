@@ -82,12 +82,16 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
+
     //LiveData
     implementation("androidx.compose.runtime:runtime-livedata:1.6.7")
 
     //Emojis
     //implementation ("com.vanniktech:emoji-twitter:0.7.0")
 
+
+//Swipe
+    implementation ("me.saket.swipe:swipe:1.1.1")
 
 
 }

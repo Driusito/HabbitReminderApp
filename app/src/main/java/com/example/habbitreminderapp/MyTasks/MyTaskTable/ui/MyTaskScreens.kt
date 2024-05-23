@@ -47,9 +47,9 @@ fun MyTaskScreens(
     val uiStateToday by myTaskTableViewModel.uiStateToday.collectAsState()
     val uiStateTomorrow by myTaskTableViewModel.uiStateTomorrow.collectAsState()
     val uiStateComing by myTaskTableViewModel.uiStateComing.collectAsState()
-    LaunchedEffect(Unit) {
+   /*LaunchedEffect(Unit) {
         myTaskTableViewModel.setOverDueTasks()
-    }
+    }*/
 
     when {
         uiStateToday is MyTaskTableUiState.Error ||

@@ -3,6 +3,7 @@ package com.example.habbitreminderapp.MyTasks.MyTaskTable.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.habbitreminderapp.Domain.AddTaskUseCase
+import com.example.habbitreminderapp.Domain.DeleteTaskUseCase
 import com.example.habbitreminderapp.Domain.GetLastIdUseCase
 import com.example.habbitreminderapp.Domain.GetTaskOfTodayUseCase
 import com.example.habbitreminderapp.Domain.GetTaskOfTomorrowUseCase
@@ -28,7 +29,8 @@ class MyTaskTableViewModel @Inject constructor(
     getTasksComing: GetTasksComing,
     var setDoneTaskUseCase: SetDoneTaskUseCase,
     val getLastIdUseCase: GetLastIdUseCase,
-    val setOverdueTaskUseCase: SetOverdueTaskUseCase
+    val setOverdueTaskUseCase: SetOverdueTaskUseCase,
+    val deleteTaskUseCase: DeleteTaskUseCase
 ) : ViewModel() {
 
 
@@ -70,6 +72,10 @@ class MyTaskTableViewModel @Inject constructor(
 
     suspend fun setOverDueTasks(){
         setOverdueTaskUseCase()
+    }
+
+    suspend fun deleteTask(taskModel: TaskModel){
+        deleteTaskUseCase(taskModel)
     }
 
 

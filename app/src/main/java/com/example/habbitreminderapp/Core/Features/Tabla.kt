@@ -3,6 +3,10 @@ package com.example.habbitreminderapp.Core.Features
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -18,11 +22,18 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CropSquare
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material3.DismissDirection
+import androidx.compose.material3.DismissState
+import androidx.compose.material3.DismissValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,18 +64,27 @@ import java.util.concurrent.TimeUnit
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ItemListaPreview(taskModel: TaskModel, viewModel: MyTaskTableViewModel,tipoFormato: Int) {
+fun ItemListaPreview(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato: Int) {
     val coroutineScope = rememberCoroutineScope()
-    var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
+    var currentTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
     var showError by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        while (true) {
+            currentTime = System.currentTimeMillis()
+            delay(1000) // Update every second
+        }
+    }
     Box(
         modifier = Modifier
             .padding(10.dp)
             .clickable {
                 val currentTimestampSeconds = currentTime / 1000
-                if (currentTimestampSeconds >= taskModel.fecha &&currentTimestampSeconds <= taskModel.proximaFecha) {
+                Log.i("Hora", currentTimestampSeconds.toString())
+                Log.i("Hora 2", taskModel.fecha.toString())
+                Log.i("Hora 3", taskModel.proximaFecha.toString())
+                if (currentTimestampSeconds >= taskModel.fecha && currentTimestampSeconds <= taskModel.proximaFecha) {
                     coroutineScope.launch {
                         viewModel.setDoneTask(taskModel.id)
                         val lastID = viewModel.getLastID()
@@ -92,9 +112,8 @@ fun ItemListaPreview(taskModel: TaskModel, viewModel: MyTaskTableViewModel,tipoF
                         Text("OK")
                     }
                 },
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text(text = "Aún no puedes editar")
+                modifier = Modifier.padding(8.dp), dismissAction = { showError = false }) {
+                Text(text = "¡Aún no ha llegado la hora!")
             }
         }
         Row(
@@ -145,7 +164,6 @@ fun ItemListaPreview(taskModel: TaskModel, viewModel: MyTaskTableViewModel,tipoF
         }
     }
 }
-
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -262,6 +280,7 @@ fun Pagina(
     tasksComing: List<TaskModel>
 ) {
     val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -277,20 +296,28 @@ fun Pagina(
 
                     "Hoy" -> {
                         tasksToday.forEach { task ->
-                            ItemListaPreview(task,myTaskTableViewModel,0)
+                            SwipeToDeleteItem(
+                                item = task,
+                                onDelete = {
+                                    coroutineScope.launch {
+                                        myTaskTableViewModel.deleteTask(task)
+                                    }
+                                },
+                                content = { ItemListaPreview(task, myTaskTableViewModel, 0) })
+
 
                         }
                     }
 
                     "Mañana" -> {
                         tasksTomorrow.forEach { task ->
-                            ItemListaPreview(task,myTaskTableViewModel,0)
+                            ItemListaPreview(task, myTaskTableViewModel, 0)
                         }
                     }
 
                     "Próximos" -> {
                         tasksComing.forEach { task ->
-                            ItemListaPreview(task,myTaskTableViewModel,1)
+                            ItemListaPreview(task, myTaskTableViewModel, 1)
                         }
                     }
                 }
@@ -349,4 +376,69 @@ fun TimeDisplay(targetTimeMilliseconds: Long): Long {
         overflow = TextOverflow.Ellipsis
     )
     return remainingTime
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DeleteBackground(swipeDismissState: DismissState) {
+    val color = if (swipeDismissState.dismissDirection == DismissDirection.EndToStart) {
+        Color.Red
+    } else Color.Transparent
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color)
+            .padding(16.dp), contentAlignment = Alignment.CenterEnd
+    ) {
+        Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+    }
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <T> SwipeToDeleteItem(
+    item: T,
+    onDelete: (T) -> Unit,
+    animationDuration: Int = 500,
+    content: @Composable (T) -> Unit
+) {
+    var isRemoved by remember {
+        mutableStateOf(false)
+    }
+    val state = rememberDismissState(
+        confirmValueChange = { value ->
+            if (value == DismissValue.DismissedToStart) {
+                isRemoved = true
+                true
+            } else {
+                false
+            }
+
+        }
+
+    )
+
+    LaunchedEffect(key1 = isRemoved) {
+        if (isRemoved) {
+            delay(animationDuration.toLong())
+            onDelete(item)
+        }
+    }
+    AnimatedVisibility(
+        visible = !isRemoved,
+        exit = shrinkVertically(
+            animationSpec = tween(animationDuration),
+            shrinkTowards = Alignment.Top
+        ) + fadeOut()
+    ) {
+        SwipeToDismiss(
+            state = state,
+            background = { DeleteBackground(swipeDismissState = state) },
+            dismissContent = { content(item) },
+            directions = setOf(DismissDirection.EndToStart)
+        )
+
+    }
+
 }

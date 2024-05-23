@@ -1,5 +1,6 @@
 package com.example.habbitreminderapp.Database.Task
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -39,5 +40,8 @@ interface TaskDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun  addTask(taskEntity: TaskEntity)
+
+    @Delete
+    suspend fun deleteTask(taskEntity: TaskEntity)
 
 }
