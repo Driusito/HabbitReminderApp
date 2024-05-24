@@ -17,12 +17,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CropSquare
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DoneOutline
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissState
@@ -86,15 +88,7 @@ fun ItemListaPreview(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipo
                 Log.i("Hora 3", taskModel.proximaFecha.toString())
                 if (currentTimestampSeconds >= taskModel.fecha && currentTimestampSeconds <= taskModel.proximaFecha) {
                     coroutineScope.launch {
-                        viewModel.setDoneTask(taskModel.id)
-                        val lastID = viewModel.getLastID()
-                        viewModel.addTask(
-                            taskModel.copy(
-                                id = lastID,
-                                fecha = taskModel.proximaFecha,
-                                proximaFecha = taskModel.proximaFecha + taskModel.margen
-                            )
-                        )
+
                     }
                 } else {
                     showError = true
@@ -166,109 +160,109 @@ fun ItemListaPreview(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipo
 }
 
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun ItemLista(
-    taskModel: TaskModel,
-    tipoFormato: Int,
-    myTaskTableViewModel: MyTaskTableViewModel
-) {
-    var currentTime by remember {
-        mutableLongStateOf(System.currentTimeMillis())
-    }
-
-    Box(
-        modifier = Modifier
-            .padding(10.dp)
-            .clip(RoundedCornerShape(15.dp))
-            .background(
-                if (currentTime / 1000 < taskModel.proximaFecha) Color(
-                    64,
-                    110,
-                    180,
-                    255
-                ) else Color.Blue
-            )
-            .fillMaxWidth(.9f)
-    ) {
-        Row(
-            Modifier
-                .padding(20.dp)
-                .fillMaxWidth()
-        ) {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(10.dp)) {
-                Icon(imageVector = Icons.Default.CropSquare, contentDescription = "")
-            }
-            Box {
-                Column {
-                    val fechaComienzo = taskModel.fecha
-                    val siguienteFecha = taskModel.proximaFecha
-
-                    Text(text = taskModel.nombre, color = Color.White)
-                    val timestamp = fechaComienzo * 1000
-                    val date = LocalDateTime.ofInstant(
-                        Instant.ofEpochMilli(timestamp),
-                        ZoneId.systemDefault()
-                    )
-
-                    val timestamp2 = siguienteFecha * 1000
-                    val date2 = LocalDateTime.ofInstant(
-                        Instant.ofEpochMilli(timestamp2),
-                        ZoneId.systemDefault()
-                    )
-
-                    val formatter = if (tipoFormato == 0) {
-                        DateTimeFormatter.ofPattern("HH:mm")
-                    } else {
-                        DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
-                    }
-                    val formattedTime = date.format(formatter)
-                    val formattedTime2 = date2.format(formatter)
-
-                    Text(text = "Inicio: $formattedTime", color = Color(238, 229, 217, 255))
-                    Text(text = "Próxima: $formattedTime2", color = Color(238, 229, 217, 255))
-
-                    val active = remember { mutableStateOf(true) }
-
-                    if (siguienteFecha >= currentTime / 1000) {
-                        Text(
-                            text = "Tiempo restante para confirmar: ",
-                            color = Color(218, 134, 7, 255)
-                        )
-                        if (active.value) {
-                            LaunchedEffect(siguienteFecha) {
-                                while (true) {
-                                    delay(1000L)
-                                    val tiempoRestante =
-                                        siguienteFecha * 1000 - System.currentTimeMillis()
-                                    if (tiempoRestante <= 0) {
-                                        myTaskTableViewModel.setDoneTask(taskModel.id)
-                                        myTaskTableViewModel.addTask(
-                                            taskModel.copy(
-                                                id = myTaskTableViewModel.getLastID(),  // Asegúrate de incrementar el ID
-                                                nombre = taskModel.nombre,
-                                                color = taskModel.color,
-                                                descripcion = taskModel.descripcion,
-                                                fecha = taskModel.proximaFecha,
-                                                margen = taskModel.margen,
-                                                proximaFecha = taskModel.proximaFecha + taskModel.margen,
-                                                cumplida = 0,
-                                                categoriaId = taskModel.categoriaId
-                                            )
-                                        )
-                                        active.value = false
-                                        break
-                                    }
-                                }
-                            }
-                            TimeDisplay(targetTimeMilliseconds = siguienteFecha * 1000)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+//@RequiresApi(Build.VERSION_CODES.O)
+//@Composable
+//fun ItemLista(
+//    taskModel: TaskModel,
+//    tipoFormato: Int,
+//    myTaskTableViewModel: MyTaskTableViewModel
+//) {
+//    var currentTime by remember {
+//        mutableLongStateOf(System.currentTimeMillis())
+//    }
+//
+//    Box(
+//        modifier = Modifier
+//            .padding(10.dp)
+//            .clip(RoundedCornerShape(15.dp))
+//            .background(
+//                if (currentTime / 1000 < taskModel.proximaFecha) Color(
+//                    64,
+//                    110,
+//                    180,
+//                    255
+//                ) else Color.Blue
+//            )
+//            .fillMaxWidth(.9f)
+//    ) {
+//        Row(
+//            Modifier
+//                .padding(20.dp)
+//                .fillMaxWidth()
+//        ) {
+//            Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(10.dp)) {
+//                Icon(imageVector = Icons.Default.CropSquare, contentDescription = "")
+//            }
+//            Box {
+//                Column {
+//                    val fechaComienzo = taskModel.fecha
+//                    val siguienteFecha = taskModel.proximaFecha
+//
+//                    Text(text = taskModel.nombre, color = Color.White)
+//                    val timestamp = fechaComienzo * 1000
+//                    val date = LocalDateTime.ofInstant(
+//                        Instant.ofEpochMilli(timestamp),
+//                        ZoneId.systemDefault()
+//                    )
+//
+//                    val timestamp2 = siguienteFecha * 1000
+//                    val date2 = LocalDateTime.ofInstant(
+//                        Instant.ofEpochMilli(timestamp2),
+//                        ZoneId.systemDefault()
+//                    )
+//
+//                    val formatter = if (tipoFormato == 0) {
+//                        DateTimeFormatter.ofPattern("HH:mm")
+//                    } else {
+//                        DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+//                    }
+//                    val formattedTime = date.format(formatter)
+//                    val formattedTime2 = date2.format(formatter)
+//
+//                    Text(text = "Inicio: $formattedTime", color = Color(238, 229, 217, 255))
+//                    Text(text = "Próxima: $formattedTime2", color = Color(238, 229, 217, 255))
+//
+//                    val active = remember { mutableStateOf(true) }
+//
+//                    if (siguienteFecha >= currentTime / 1000) {
+//                        Text(
+//                            text = "Tiempo restante para confirmar: ",
+//                            color = Color(218, 134, 7, 255)
+//                        )
+//                        if (active.value) {
+//                            LaunchedEffect(siguienteFecha) {
+//                                while (true) {
+//                                    delay(1000L)
+//                                    val tiempoRestante =
+//                                        siguienteFecha * 1000 - System.currentTimeMillis()
+//                                    if (tiempoRestante <= 0) {
+//                                        myTaskTableViewModel.setDoneTask(taskModel.id)
+//                                        myTaskTableViewModel.addTask(
+//                                            taskModel.copy(
+//                                                id = myTaskTableViewModel.getLastID(),  // Asegúrate de incrementar el ID
+//                                                nombre = taskModel.nombre,
+//                                                color = taskModel.color,
+//                                                descripcion = taskModel.descripcion,
+//                                                fecha = taskModel.proximaFecha,
+//                                                margen = taskModel.margen,
+//                                                proximaFecha = taskModel.proximaFecha + taskModel.margen,
+//                                                cumplida = 0,
+//                                                categoriaId = taskModel.categoriaId
+//                                            )
+//                                        )
+//                                        active.value = false
+//                                        break
+//                                    }
+//                                }
+//                            }
+//                            TimeDisplay(targetTimeMilliseconds = siguienteFecha * 1000)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -281,46 +275,57 @@ fun Pagina(
 ) {
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
         LazyColumn(state = listState) {
-            itemsIndexed(listOf("Atrasados", "Hoy", "Mañana", "Próximos")) { index, categoria ->
-                Text(text = categoria, modifier = Modifier.padding(20.dp))
-                when (categoria) {
-                    "Atrasados" -> {
-                        // ...
-                    }
+            item {
+                Text(text = "Atrasados", modifier = Modifier.padding(20.dp))
+                // Aquí puedes manejar los elementos atrasados
+            }
 
-                    "Hoy" -> {
-                        tasksToday.forEach { task ->
-                            SwipeToDeleteItem(
-                                item = task,
-                                onDelete = {
-                                    coroutineScope.launch {
-                                        myTaskTableViewModel.deleteTask(task)
-                                    }
-                                },
-                                content = { ItemListaPreview(task, myTaskTableViewModel, 0) })
+            item {
+                Text(text = "Hoy", modifier = Modifier.padding(20.dp))
+            }
+            items(tasksToday, key = { it.id }) { task ->
+                var isRemoved by remember(task.id) { mutableStateOf(false) }
+                var isDone by remember(task.id) { mutableStateOf(false) }
 
-
-                        }
-                    }
-
-                    "Mañana" -> {
-                        tasksTomorrow.forEach { task ->
-                            ItemListaPreview(task, myTaskTableViewModel, 0)
-                        }
-                    }
-
-                    "Próximos" -> {
-                        tasksComing.forEach { task ->
-                            ItemListaPreview(task, myTaskTableViewModel, 1)
-                        }
-                    }
+                if (!isRemoved && !isDone) {
+                    SwipeToDeleteOrCompleteItem(
+                        item = task,
+                        onDelete = {
+                            isRemoved = true
+                            coroutineScope.launch {
+                                myTaskTableViewModel.deleteTask(task)
+                            }
+                        },
+                        onDone = {
+                            isDone = true
+                            coroutineScope.launch {
+                                myTaskTableViewModel.setDoneTask(task.id, task)
+                            }
+                        },
+                        content = { item -> ItemListaPreview(item, myTaskTableViewModel, 0) }
+                    )
                 }
+            }
+
+            item {
+                Text(text = "Mañana", modifier = Modifier.padding(20.dp))
+            }
+            items(tasksTomorrow, key = { it.id }) { task ->
+                ItemListaPreview(task, myTaskTableViewModel, 0)
+            }
+
+            item {
+                Text(text = "Próximos", modifier = Modifier.padding(20.dp))
+            }
+            items(tasksComing, key = { it.id }) { task ->
+                ItemListaPreview(task, myTaskTableViewModel, 1)
             }
         }
     }
@@ -377,7 +382,6 @@ fun TimeDisplay(targetTimeMilliseconds: Long): Long {
     )
     return remainingTime
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeleteBackground(swipeDismissState: DismissState) {
@@ -388,45 +392,75 @@ fun DeleteBackground(swipeDismissState: DismissState) {
         modifier = Modifier
             .fillMaxSize()
             .background(color)
-            .padding(16.dp), contentAlignment = Alignment.CenterEnd
+            .padding(16.dp),
+        contentAlignment = Alignment.CenterEnd
     ) {
-        Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+        if (swipeDismissState.dismissDirection == DismissDirection.EndToStart) {
+            Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+        }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun <T> SwipeToDeleteItem(
+fun CompleteBackground(swipeDismissState: DismissState) {
+    val color = if (swipeDismissState.dismissDirection == DismissDirection.StartToEnd) {
+        Color.Green
+    } else Color.Transparent
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color)
+            .padding(16.dp).clip(RoundedCornerShape(5.dp)),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        if (swipeDismissState.dismissDirection == DismissDirection.StartToEnd) {
+            Icon(imageVector = Icons.Default.DoneOutline, contentDescription = "Done", tint = Color.White)
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <T> SwipeToDeleteOrCompleteItem(
     item: T,
     onDelete: (T) -> Unit,
+    onDone: (T) -> Unit,
     animationDuration: Int = 500,
     content: @Composable (T) -> Unit
 ) {
-    var isRemoved by remember {
-        mutableStateOf(false)
-    }
+    var isRemoved by remember { mutableStateOf(false) }
+    var isDone by remember { mutableStateOf(false) }
     val state = rememberDismissState(
         confirmValueChange = { value ->
-            if (value == DismissValue.DismissedToStart) {
-                isRemoved = true
-                true
-            } else {
-                false
+            when (value) {
+                DismissValue.DismissedToStart -> {
+                    isRemoved = true
+                    true
+                }
+                DismissValue.DismissedToEnd -> {
+                    isDone = true
+                    true
+                }
+                else -> false
             }
-
         }
-
     )
 
-    LaunchedEffect(key1 = isRemoved) {
+    LaunchedEffect(isRemoved, isDone) {
         if (isRemoved) {
             delay(animationDuration.toLong())
             onDelete(item)
         }
+        if (isDone) {
+            delay(animationDuration.toLong())
+            onDone(item)
+        }
     }
+
     AnimatedVisibility(
-        visible = !isRemoved,
+        visible = !isRemoved && !isDone,
         exit = shrinkVertically(
             animationSpec = tween(animationDuration),
             shrinkTowards = Alignment.Top
@@ -434,11 +468,15 @@ fun <T> SwipeToDeleteItem(
     ) {
         SwipeToDismiss(
             state = state,
-            background = { DeleteBackground(swipeDismissState = state) },
+            background = {
+                if (state.dismissDirection == DismissDirection.EndToStart) {
+                    DeleteBackground(swipeDismissState = state)
+                } else if (state.dismissDirection == DismissDirection.StartToEnd) {
+                    CompleteBackground(swipeDismissState = state)
+                }
+            },
             dismissContent = { content(item) },
-            directions = setOf(DismissDirection.EndToStart)
+            directions = setOf(DismissDirection.EndToStart, DismissDirection.StartToEnd)
         )
-
     }
-
 }

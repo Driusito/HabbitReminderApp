@@ -64,9 +64,17 @@ class MyTaskTableViewModel @Inject constructor(
         }
     }
 
-    fun setDoneTask(id: Int) {
+    fun setDoneTask(id: Int,taskModel: TaskModel) {
         viewModelScope.launch(Dispatchers.IO) {
             setDoneTaskUseCase(id)
+           val id = getLastID()
+           addTask(
+                taskModel.copy(
+                    id = id,
+                    fecha = taskModel.proximaFecha,
+                    proximaFecha = taskModel.proximaFecha + taskModel.margen
+                )
+            )
         }
     }
 
