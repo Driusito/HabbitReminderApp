@@ -9,7 +9,7 @@ data class TaskModel(
 
     val nombre: String,
 
-    val color: String,
+    val color: Long,
 
     val descripcion: String,
 
@@ -22,7 +22,7 @@ data class TaskModel(
     val cumplida: Int,
 
 
-    val categoriaId: Int
+    val categoriaId: String
 
 
 )

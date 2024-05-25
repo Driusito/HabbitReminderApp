@@ -13,7 +13,7 @@ data class TaskEntity(
     @ColumnInfo(name = "nombreTarea")
     var nombre:String="",
     @ColumnInfo(name = "colorTarea")
-    var color:String="",
+    var color:Long=0L,
     @ColumnInfo(name = "descripcionTarea")
     var descripcion:String="",
     @ColumnInfo(name = "fechaTarea")
@@ -25,5 +25,5 @@ data class TaskEntity(
     @ColumnInfo(name = "cumplidaTarea")
     var cumplida:Int=0,
     @ColumnInfo(name = "categoriaIdTarea")
-    var categoriaId:Int=0
+    var categoriaId:String=""
 )

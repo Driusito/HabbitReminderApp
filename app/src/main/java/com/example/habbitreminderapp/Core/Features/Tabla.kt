@@ -18,11 +18,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CropSquare
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DoneOutline
 import androidx.compose.material.icons.filled.Face
@@ -48,13 +46,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.habbitreminderapp.Model.data.TaskModel
 import com.example.habbitreminderapp.MyTasks.MyTaskTable.ui.MyTaskTableViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
+import com.example.habbitreminderapp.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -66,7 +65,9 @@ import java.util.concurrent.TimeUnit
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ItemListaPreview(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato: Int) {
+fun ItemLista(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato: Int) {
+
+
     val coroutineScope = rememberCoroutineScope()
     var currentTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
@@ -96,7 +97,7 @@ fun ItemListaPreview(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipo
 
             }
             .clip(RoundedCornerShape(12.dp))
-            .background(Color(64, 110, 180, 255))
+            .background(Color(taskModel.color))
             .fillMaxWidth(.9f)
     ) {
         if (showError) {
@@ -115,22 +116,19 @@ fun ItemListaPreview(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipo
                 .padding(10.dp)
                 .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
         ) {
+
             Box(modifier = Modifier.weight(2.5f)) {
                 Column {
                     Text(
                         text = taskModel.nombre,
                         color = Color.White,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis, fontFamily = FontFamily(Font(R.font.lato_regular))
                     )
                 }
             }
             Spacer(modifier = Modifier.weight(.5f))
 
-            Icon(
-                imageVector = Icons.Default.Face,
-                contentDescription = "",
-                modifier = Modifier.weight(1f)
-            )
+            Text(text = taskModel.categoriaId, modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.weight(.5f))
 
             val fechaComienzo = taskModel.fecha
@@ -160,111 +158,6 @@ fun ItemListaPreview(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipo
 }
 
 
-//@RequiresApi(Build.VERSION_CODES.O)
-//@Composable
-//fun ItemLista(
-//    taskModel: TaskModel,
-//    tipoFormato: Int,
-//    myTaskTableViewModel: MyTaskTableViewModel
-//) {
-//    var currentTime by remember {
-//        mutableLongStateOf(System.currentTimeMillis())
-//    }
-//
-//    Box(
-//        modifier = Modifier
-//            .padding(10.dp)
-//            .clip(RoundedCornerShape(15.dp))
-//            .background(
-//                if (currentTime / 1000 < taskModel.proximaFecha) Color(
-//                    64,
-//                    110,
-//                    180,
-//                    255
-//                ) else Color.Blue
-//            )
-//            .fillMaxWidth(.9f)
-//    ) {
-//        Row(
-//            Modifier
-//                .padding(20.dp)
-//                .fillMaxWidth()
-//        ) {
-//            Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(10.dp)) {
-//                Icon(imageVector = Icons.Default.CropSquare, contentDescription = "")
-//            }
-//            Box {
-//                Column {
-//                    val fechaComienzo = taskModel.fecha
-//                    val siguienteFecha = taskModel.proximaFecha
-//
-//                    Text(text = taskModel.nombre, color = Color.White)
-//                    val timestamp = fechaComienzo * 1000
-//                    val date = LocalDateTime.ofInstant(
-//                        Instant.ofEpochMilli(timestamp),
-//                        ZoneId.systemDefault()
-//                    )
-//
-//                    val timestamp2 = siguienteFecha * 1000
-//                    val date2 = LocalDateTime.ofInstant(
-//                        Instant.ofEpochMilli(timestamp2),
-//                        ZoneId.systemDefault()
-//                    )
-//
-//                    val formatter = if (tipoFormato == 0) {
-//                        DateTimeFormatter.ofPattern("HH:mm")
-//                    } else {
-//                        DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
-//                    }
-//                    val formattedTime = date.format(formatter)
-//                    val formattedTime2 = date2.format(formatter)
-//
-//                    Text(text = "Inicio: $formattedTime", color = Color(238, 229, 217, 255))
-//                    Text(text = "Próxima: $formattedTime2", color = Color(238, 229, 217, 255))
-//
-//                    val active = remember { mutableStateOf(true) }
-//
-//                    if (siguienteFecha >= currentTime / 1000) {
-//                        Text(
-//                            text = "Tiempo restante para confirmar: ",
-//                            color = Color(218, 134, 7, 255)
-//                        )
-//                        if (active.value) {
-//                            LaunchedEffect(siguienteFecha) {
-//                                while (true) {
-//                                    delay(1000L)
-//                                    val tiempoRestante =
-//                                        siguienteFecha * 1000 - System.currentTimeMillis()
-//                                    if (tiempoRestante <= 0) {
-//                                        myTaskTableViewModel.setDoneTask(taskModel.id)
-//                                        myTaskTableViewModel.addTask(
-//                                            taskModel.copy(
-//                                                id = myTaskTableViewModel.getLastID(),  // Asegúrate de incrementar el ID
-//                                                nombre = taskModel.nombre,
-//                                                color = taskModel.color,
-//                                                descripcion = taskModel.descripcion,
-//                                                fecha = taskModel.proximaFecha,
-//                                                margen = taskModel.margen,
-//                                                proximaFecha = taskModel.proximaFecha + taskModel.margen,
-//                                                cumplida = 0,
-//                                                categoriaId = taskModel.categoriaId
-//                                            )
-//                                        )
-//                                        active.value = false
-//                                        break
-//                                    }
-//                                }
-//                            }
-//                            TimeDisplay(targetTimeMilliseconds = siguienteFecha * 1000)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
-
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Pagina(
@@ -283,12 +176,15 @@ fun Pagina(
     ) {
         LazyColumn(state = listState) {
             item {
-                Text(text = "Atrasados", modifier = Modifier.padding(20.dp))
+                Text(text = "Atrasados", modifier = Modifier.padding(20.dp), fontFamily = FontFamily(
+                    Font(R.font.lato_bold)
+                ))
                 // Aquí puedes manejar los elementos atrasados
             }
 
             item {
-                Text(text = "Hoy", modifier = Modifier.padding(20.dp))
+                Text(text = "Hoy", modifier = Modifier.padding(20.dp),fontFamily = FontFamily(
+                    Font(R.font.lato_bold)))
             }
             items(tasksToday, key = { it.id }) { task ->
                 var isRemoved by remember(task.id) { mutableStateOf(false) }
@@ -309,23 +205,25 @@ fun Pagina(
                                 myTaskTableViewModel.setDoneTask(task.id, task)
                             }
                         },
-                        content = { item -> ItemListaPreview(item, myTaskTableViewModel, 0) }
+                        content = { item -> ItemLista(item, myTaskTableViewModel, 0) }
                     )
                 }
             }
 
             item {
-                Text(text = "Mañana", modifier = Modifier.padding(20.dp))
+                Text(text = "Mañana", modifier = Modifier.padding(20.dp),fontFamily = FontFamily(
+                    Font(R.font.lato_bold)))
             }
             items(tasksTomorrow, key = { it.id }) { task ->
-                ItemListaPreview(task, myTaskTableViewModel, 0)
+                ItemLista(task, myTaskTableViewModel, 0)
             }
 
             item {
-                Text(text = "Próximos", modifier = Modifier.padding(20.dp))
+                Text(text = "Próximos", modifier = Modifier.padding(20.dp),fontFamily = FontFamily(
+                    Font(R.font.lato_bold)))
             }
             items(tasksComing, key = { it.id }) { task ->
-                ItemListaPreview(task, myTaskTableViewModel, 1)
+                ItemLista(task, myTaskTableViewModel, 1)
             }
         }
     }
@@ -382,6 +280,7 @@ fun TimeDisplay(targetTimeMilliseconds: Long): Long {
     )
     return remainingTime
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeleteBackground(swipeDismissState: DismissState) {
@@ -391,12 +290,17 @@ fun DeleteBackground(swipeDismissState: DismissState) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .clip(RoundedCornerShape(12.dp))
             .background(color)
             .padding(16.dp),
         contentAlignment = Alignment.CenterEnd
     ) {
         if (swipeDismissState.dismissDirection == DismissDirection.EndToStart) {
-            Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete",
+                tint = Color.White
+            )
         }
     }
 }
@@ -410,12 +314,17 @@ fun CompleteBackground(swipeDismissState: DismissState) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .clip(RoundedCornerShape(12.dp))
             .background(color)
-            .padding(16.dp).clip(RoundedCornerShape(5.dp)),
+            .padding(16.dp),
         contentAlignment = Alignment.CenterStart
     ) {
         if (swipeDismissState.dismissDirection == DismissDirection.StartToEnd) {
-            Icon(imageVector = Icons.Default.DoneOutline, contentDescription = "Done", tint = Color.White)
+            Icon(
+                imageVector = Icons.Default.DoneOutline,
+                contentDescription = "Done",
+                tint = Color.White
+            )
         }
     }
 }
@@ -439,10 +348,12 @@ fun <T> SwipeToDeleteOrCompleteItem(
                     isRemoved = true
                     true
                 }
+
                 DismissValue.DismissedToEnd -> {
                     isDone = true
                     true
                 }
+
                 else -> false
             }
         }

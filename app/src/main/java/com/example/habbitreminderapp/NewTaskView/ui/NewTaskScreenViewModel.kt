@@ -7,10 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.habbitreminderapp.Domain.AddTaskUseCase
 import com.example.habbitreminderapp.Model.data.TaskModel
-import dagger.hilt.InstallIn
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -27,8 +24,8 @@ class NewTaskScreenViewModel @Inject constructor(private val addTaskUseCase: Add
     private var _descriptionTask = MutableLiveData<String>()
     val descriptionTask: LiveData<String> = _descriptionTask
 
-    private var _colorTask = MutableLiveData<String>()
-    val colorTask: LiveData<String> = _colorTask
+    private var _colorTask = MutableLiveData<Long>()
+    val colorTask: LiveData<Long> = _colorTask
 
     private var _dateTask = MutableLiveData<Long>()
     val dateTask: LiveData<Long> = _dateTask
@@ -39,19 +36,18 @@ class NewTaskScreenViewModel @Inject constructor(private val addTaskUseCase: Add
     private var _doneTask = MutableLiveData<Int>()
     val doneTask: LiveData<Int> = _doneTask
 
-    private var _categoryIdTask = MutableLiveData<Int>()
-    val categoryIdTask: LiveData<Int> = _categoryIdTask
+    private var _categoryEmoji = MutableLiveData<String>()
+    val categoryEmoji: LiveData<String> = _categoryEmoji
 
-    private var _task=MutableLiveData<TaskModel>()
-    val task:LiveData<TaskModel> =_task
+    private var _task = MutableLiveData<TaskModel>()
+    val task: LiveData<TaskModel> = _task
 
-    private var _openCalendar=MutableLiveData<Boolean>()
-    val openCalendar:LiveData<Boolean> =_openCalendar
+    private var _openCalendar = MutableLiveData<Boolean>()
+    val openCalendar: LiveData<Boolean> = _openCalendar
 
 
-
-    fun showCalendar(show:Boolean){
-        _openCalendar.value=show
+    fun showCalendar(show: Boolean) {
+        _openCalendar.value = show
     }
 
     private var _fechaUi = MutableLiveData<String>()
@@ -66,15 +62,16 @@ class NewTaskScreenViewModel @Inject constructor(private val addTaskUseCase: Add
     }
 
     fun stringToLong(fechaString: String) {
-        _fechaUi.value=fechaString
+        _fechaUi.value = fechaString
         // Define el formato de fecha esperado
-        val formato = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale("es", "ES")) // Para español de España
+        val formato =
+            SimpleDateFormat("dd/MM/yyyy HH:mm", Locale("es", "ES")) // Para español de España
         formato.timeZone = TimeZone.getDefault()
         try {
             // Parsea la cadena de fecha al formato especificado
             val date = (formato.parse(fechaString)?.time?.div(1000)) ?: 0L
             Log.i("Calendario5", date.toString())
-           _dateTask.value=date
+            _dateTask.value = date
         } catch (e: Exception) {
             // En caso de error, retorna 0
 
@@ -82,7 +79,6 @@ class NewTaskScreenViewModel @Inject constructor(private val addTaskUseCase: Add
 
         }
     }
-
 
 
     fun minToLong(minutosPar: String): Long {
@@ -116,31 +112,36 @@ class NewTaskScreenViewModel @Inject constructor(private val addTaskUseCase: Add
     }
 
 
-    fun addTask(minutos:String,horas: String,dias: String) {
-        val margen= (minToLong(minutos) + hourToLong(horas) + dayToLong(dias))
+    fun addTask(minutos: String, horas: String, dias: String) {
+        val margen = (minToLong(minutos) + hourToLong(horas) + dayToLong(dias))
         _task.value = TaskModel(
             id = 0,
             nombre = _nameTask.value ?: "",
-            color = "",
+            color = _colorTask.value ?: 0xFF36B1E4, // Valor por defecto en formato Long
             descripcion = _descriptionTask.value ?: "",
             fecha = _dateTask.value ?: 0L,
             margen = margen,
             proximaFecha = _dateTask.value!! + margen,
             cumplida = 0,
-            categoriaId = 1
+            categoriaId = _categoryEmoji.value ?: " "
         )
 
-
         viewModelScope.launch {
-
             _task.value?.let { addTaskUseCase(it) }
-
         }
 
-        _nameTask.value=""
-        _descriptionTask.value=""
-        _fechaUi.value=""
+        // Restablecer valores
+        _nameTask.value = ""
+        _descriptionTask.value = ""
+        _fechaUi.value = ""
+    }
 
+    fun selectColor(color: Long) {
+        _colorTask.value=color
+    }
+
+    fun selectCategory(emoji:String){
+        _categoryEmoji.value=emoji
     }
 
 

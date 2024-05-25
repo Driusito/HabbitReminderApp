@@ -16,6 +16,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Colorize
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Face
@@ -28,6 +29,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
@@ -41,6 +43,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,7 +52,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.habbitreminderapp.Core.Features.BotonConfirmar
+import com.example.habbitreminderapp.Core.Features.ChooseColorDialogue
+import com.example.habbitreminderapp.Core.Features.EmojiSelector
 import com.example.habbitreminderapp.Core.Features.MyCalendar
+import com.example.habbitreminderapp.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,10 +65,11 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
 
     val nombreTarea: String by newTaskScreenViewModel.nameTask.observeAsState(initial = "")
     val descripcionTarea: String by newTaskScreenViewModel.descriptionTask.observeAsState(initial = "")
-    val colorTarea: String by newTaskScreenViewModel.colorTask.observeAsState(initial = "")
+    val colorTarea: Long by newTaskScreenViewModel.colorTask.observeAsState(initial = 0L)
     val fechaTarea: String by newTaskScreenViewModel.fechaUi.observeAsState(initial = "")
     val margenTarea: Long by newTaskScreenViewModel.marginTask.observeAsState(initial = 0L)
     val cumplidaTarea: Int by newTaskScreenViewModel.doneTask.observeAsState(initial = 0)
+
     var minutos by remember {
         mutableStateOf("")
     }
@@ -71,6 +79,17 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
     var dias by remember {
         mutableStateOf("")
     }
+    var showColorSelector by remember {
+        mutableStateOf(false)
+    }
+
+    var showCategory by remember {
+        mutableStateOf(false)
+    }
+    var categorySelected by remember {
+        mutableStateOf("")
+    }
+
 
 
     val abrirCalendario: Boolean by newTaskScreenViewModel.openCalendar.observeAsState(initial = false)
@@ -82,7 +101,7 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
             Text(
                 text = "Nueva Meta",
                 color = Color.White,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold, fontFamily = FontFamily(Font(R.font.lato_regular)),
             )
         }, navigationIcon = {
             IconButton(onClick = { navController.popBackStack() }) {
@@ -109,7 +128,7 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
                     text = "Nombre",
                     color = Color.Black,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
+                    fontSize = 20.sp, fontFamily = FontFamily(Font(R.font.lato_regular)),
                     modifier = Modifier.weight(
                         2f
                     )
@@ -119,7 +138,7 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
                     text = "Categoria",
                     color = Color.Black,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
+                    fontSize = 20.sp, fontFamily = FontFamily(Font(R.font.lato_regular)),
                     modifier = Modifier.weight(
                         2f
                     )
@@ -137,8 +156,33 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
                 )
                 Spacer(modifier = Modifier.weight(.25f))
 
-                Box(modifier = Modifier.weight(2f)) {
-                    (MyDropDownMenu())
+                Box(modifier = Modifier
+                    .weight(2f)
+                    .align(Alignment.CenterVertically)) {
+                    OutlinedTextField( value = categorySelected,
+                        onValueChange = { categorySelected = it },
+                        enabled = false,
+                        readOnly = true,
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = ""
+                            )
+                        }, colors = OutlinedTextFieldDefaults.colors(
+                            disabledContainerColor = Color.White
+                        ),
+                        modifier = Modifier
+                            .clickable { showCategory = true })
+                }
+                if (showCategory) {
+                    EmojiSelector(
+                        mostrar = showCategory,
+                        onEmojiSelected = { emoji ->
+                            newTaskScreenViewModel.selectCategory(emoji)
+                            categorySelected=emoji
+                        },
+                        onDismiss = { showCategory = false }
+                    )
                 }
 
 
@@ -150,7 +194,7 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
                     text = "Descripcion",
                     color = Color.Black,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
+                    fontSize = 20.sp, fontFamily = FontFamily(Font(R.font.lato_regular)),
                     modifier = Modifier.weight(
                         2f
                     )
@@ -170,7 +214,7 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
                     text = "Fecha de inicio",
                     color = Color.Black,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
+                    fontSize = 20.sp, fontFamily = FontFamily(Font(R.font.lato_regular)),
                     modifier = Modifier.weight(
                         2f
                     )
@@ -180,9 +224,9 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
                 Spacer(modifier = Modifier.weight(.45f))
 
                 Text(
-                    text = "Color",
+                    text = "Elige color",
                     color = Color.Black,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Bold, fontFamily = FontFamily(Font(R.font.lato_regular)),
                     fontSize = 20.sp,
                     modifier = Modifier.weight(
                         1f
@@ -190,9 +234,26 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
                 )
                 Box(
                     modifier = Modifier
-                        .background(Color.Red)
-                        .size(20.dp)
-                )
+                        .size(40.dp) // Ajusta el tamaño del Box para hacerlo más grande
+                        .clickable { showColorSelector = true }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Colorize,
+                        contentDescription = "",
+                        modifier = Modifier.fillMaxSize(), // Ajusta el tamaño del Icon para que ocupe todo el Box
+                        tint = if (colorTarea != 0L) Color(colorTarea) else Color.Black
+                    )
+                }
+                if (showColorSelector) {
+                    ChooseColorDialogue(
+                        mostrar = showColorSelector,
+                        onColorSelected = { selectedColor ->
+                            newTaskScreenViewModel.selectColor(selectedColor)
+                        },
+                        onDismiss = { showColorSelector = false }
+                    )
+                }
+
                 Spacer(modifier = Modifier.weight(.5f))
 
             }
@@ -207,8 +268,8 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
             Spacer(modifier = Modifier.weight(.25f))
 
             Text(
-                text = "Fecha seleccionada: $fechaTarea ",
-                fontSize = 20.sp,
+                text = "Fecha seleccionada: \n$fechaTarea ",
+                fontSize = 20.sp, fontFamily = FontFamily(Font(R.font.poetsenone_regular)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)
@@ -223,10 +284,10 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
 
 
             Text(
-                text = "Recordatorio cada",
+                text = "Siguiente fecha cada:",
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
+                fontSize = 20.sp, fontFamily = FontFamily(Font(R.font.lato_regular))
 
                 )
             Spacer(modifier = Modifier.weight(.25f))
@@ -250,7 +311,7 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
                 Spacer(modifier = Modifier.weight(.5f))
                 Text(
                     text = "Minutos", color = Color.Black,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Bold, fontFamily = FontFamily(Font(R.font.lato_regular)),
                     fontSize = 20.sp, modifier = Modifier.weight(1.5f)
                 )
                 Spacer(modifier = Modifier.weight(2.5f))
@@ -274,7 +335,7 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
                 Spacer(modifier = Modifier.weight(.5f))
                 Text(
                     text = "Horas", color = Color.Black,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Bold, fontFamily = FontFamily(Font(R.font.lato_regular)),
                     fontSize = 20.sp, modifier = Modifier.weight(1.5f)
                 )
                 Spacer(modifier = Modifier.weight(2.5f))
@@ -299,7 +360,7 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
                 Spacer(modifier = Modifier.weight(.5f))
                 Text(
                     text = "Días", color = Color.Black,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Bold, fontFamily = FontFamily(Font(R.font.lato_regular)),
                     fontSize = 20.sp, modifier = Modifier.weight(1.5f)
                 )
                 Spacer(modifier = Modifier.weight(2.5f))
@@ -308,13 +369,15 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
             Spacer(modifier = Modifier.weight(.25f))
 
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                FloatingActionButton(onClick = { newTaskScreenViewModel.addTask(minutos,horas, dias) }, modifier = Modifier.align(
+                FloatingActionButton(onClick = { newTaskScreenViewModel.addTask(minutos,horas, dias)
+                                               navController.popBackStack()}, modifier = Modifier.align(
                     Alignment.BottomEnd)) {
                     Icon(imageVector = Icons.Default.Done, contentDescription = "")
 
                 }
 
             }
+            Spacer(modifier = Modifier.weight(.25f))
 
 
         }
