@@ -51,6 +51,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.habbitreminderapp.Model.data.TaskModel
 import com.example.habbitreminderapp.MyTasks.MyTaskTable.ui.MyTaskTableViewModel
 import com.example.habbitreminderapp.R
@@ -118,17 +119,18 @@ fun ItemLista(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato
         ) {
 
             Box(modifier = Modifier.weight(2.5f)) {
-                Column {
-                    Text(
-                        text = taskModel.nombre,
-                        color = Color.White,
-                        overflow = TextOverflow.Ellipsis, fontFamily = FontFamily(Font(R.font.lato_regular))
-                    )
-                }
+
+                Text(
+                    text = taskModel.nombre,
+                    color = Color.White,
+                    overflow = TextOverflow.Ellipsis,
+                    fontFamily = FontFamily(Font(R.font.lato_regular))
+                )
+
             }
             Spacer(modifier = Modifier.weight(.5f))
 
-            Text(text = taskModel.categoriaId, modifier = Modifier.weight(1f))
+            Text(text = taskModel.categoriaId, fontSize = 26.sp, modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.weight(.5f))
 
             val fechaComienzo = taskModel.fecha
@@ -176,15 +178,26 @@ fun Pagina(
     ) {
         LazyColumn(state = listState) {
             item {
-                Text(text = "Atrasados", modifier = Modifier.padding(20.dp), fontFamily = FontFamily(
-                    Font(R.font.lato_bold)
-                ))
+                Text(
+                    color = Color.Black,
+                    text = "Atrasados",
+                    modifier = Modifier.padding(20.dp),
+                    fontFamily = FontFamily(
+                        Font(R.font.lato_bold)
+                    )
+                )
                 // Aquí puedes manejar los elementos atrasados
             }
 
             item {
-                Text(text = "Hoy", modifier = Modifier.padding(20.dp),fontFamily = FontFamily(
-                    Font(R.font.lato_bold)))
+                Text(
+                    color = Color.Black,
+                    text = "Hoy",
+                    modifier = Modifier.padding(20.dp),
+                    fontFamily = FontFamily(
+                        Font(R.font.lato_bold)
+                    )
+                )
             }
             items(tasksToday, key = { it.id }) { task ->
                 var isRemoved by remember(task.id) { mutableStateOf(false) }
@@ -211,16 +224,28 @@ fun Pagina(
             }
 
             item {
-                Text(text = "Mañana", modifier = Modifier.padding(20.dp),fontFamily = FontFamily(
-                    Font(R.font.lato_bold)))
+                Text(
+                    color = Color.Black,
+                    text = "Mañana",
+                    modifier = Modifier.padding(20.dp),
+                    fontFamily = FontFamily(
+                        Font(R.font.lato_bold)
+                    )
+                )
             }
             items(tasksTomorrow, key = { it.id }) { task ->
                 ItemLista(task, myTaskTableViewModel, 0)
             }
 
             item {
-                Text(text = "Próximos", modifier = Modifier.padding(20.dp),fontFamily = FontFamily(
-                    Font(R.font.lato_bold)))
+                Text(
+                    color = Color.Black,
+                    text = "Próximos",
+                    modifier = Modifier.padding(20.dp),
+                    fontFamily = FontFamily(
+                        Font(R.font.lato_bold)
+                    )
+                )
             }
             items(tasksComing, key = { it.id }) { task ->
                 ItemLista(task, myTaskTableViewModel, 1)

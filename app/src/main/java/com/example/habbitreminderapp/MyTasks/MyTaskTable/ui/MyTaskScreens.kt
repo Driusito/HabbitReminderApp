@@ -26,6 +26,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -62,7 +63,9 @@ fun MyTaskScreens(
         uiStateToday == MyTaskTableUiState.Loading ||
                 uiStateTomorrow == MyTaskTableUiState.Loading ||
                 uiStateComing == MyTaskTableUiState.Loading -> {
-            CircularProgressIndicator()
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                        CircularProgressIndicator()
+                    }
         }
         uiStateToday is MyTaskTableUiState.Success ||
                 uiStateTomorrow is MyTaskTableUiState.Success ||

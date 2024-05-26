@@ -26,11 +26,12 @@ interface TaskDao {
     @Query("SELECT * FROM TaskEntity WHERE fechaTarea >= strftime('%s', date('now', '+2 day', 'localtime'))and cumplidaTarea=0")
     fun getTaskComing(): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM TaskEntity WHERE fechaTarea >= :startOfDay AND fechaTarea < :endOfDay AND cumplidaTarea = 0")
+    @Query("SELECT * FROM TaskEntity WHERE fechaTarea >= :startOfDay AND fechaTarea < :endOfDay")
     fun getTasksForDay(startOfDay: Long, endOfDay: Long): Flow<List<TaskEntity>>
 
     @Query("UPDATE TaskEntity SET cumplidaTarea = 1 where id=:id")
     fun setDone(id:Int)
+
 
     @Query("Select Max(id)+1 from TaskEntity")
     fun getNextId():Int

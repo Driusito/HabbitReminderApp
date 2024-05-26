@@ -1,5 +1,6 @@
 package com.example.habbitreminderapp.MyTasks.MyTaskCalendar.ui
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
@@ -28,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -48,6 +51,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.habbitreminderapp.Core.Features.CustomCalendar
 import com.example.habbitreminderapp.Core.Features.ItemCalendario
+import com.example.habbitreminderapp.Model.data.TaskModel
 import com.example.habbitreminderapp.MyTasks.MyTaskTable.ui.MyTaskTableUiState
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -56,29 +60,21 @@ import java.util.Locale
 
 @Composable
 fun CustomCalendar(myTaskCalendarViewModel: MyTaskCalendarViewModel) {
-    var mes by remember { mutableStateOf(0) }
-    var fechaSeleccionada by remember { mutableStateOf<Date?>(null) }
+    val calendar = Calendar.getInstance()
+    var mes by remember { mutableStateOf(calendar.get(Calendar.MONTH)) }
+    val fechaSeleccionada: Long by myTaskCalendarViewModel.startTime.observeAsState(initial = 0L)
+    val uiStateForDay by myTaskCalendarViewModel.uiStateForDay.observeAsState(initial = MyTaskTableUiState.Loading)
+
 
     val lifeCycle = LocalLifecycleOwner.current.lifecycle
 
-    val uiStateToday by produceState<MyTaskTableUiState>(
-        initialValue = MyTaskTableUiState.Loading,
-        key1 = lifeCycle,
-        key2 = myTaskCalendarViewModel
-    ) {
-        lifeCycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
-            myTaskCalendarViewModel.uiStateForDay.collect { value = it }
-        }
-    }
 
-    when {
-        uiStateToday is MyTaskTableUiState.Error ->
-            Text(text = "Error al cargar calendario")
 
-        uiStateToday is MyTaskTableUiState.Loading ->
-            CircularProgressIndicator()
-
-        uiStateToday is MyTaskTableUiState.Success -> {
+    when (uiStateForDay) {
+        is MyTaskTableUiState.Error -> Text(text = "Error al cargar calendario")
+        is MyTaskTableUiState.Loading -> CircularProgressIndicator()
+        is MyTaskTableUiState.Success -> {
+            val listaTask = (uiStateForDay as MyTaskTableUiState.Success).tasks
             val calendar = Calendar.getInstance().apply {
                 set(Calendar.MONTH, mes)
                 firstDayOfWeek = Calendar.MONDAY // Establecer el primer día de la semana en lunes
@@ -181,36 +177,43 @@ fun CustomCalendar(myTaskCalendarViewModel: MyTaskCalendarViewModel) {
                                     day
                                 ) else if (day in 1..daysInMonth) {
                                 DayItem(day, mes, fechaSeleccionada) { fecha ->
-                                    fechaSeleccionada = fecha
+                                    myTaskCalendarViewModel.setDay(fecha * 1000)
+                                    Log.e("Tamaño", listaTask.size.toString())
+                                    Log.e("Dia seleccionado", fecha.toString())
+
                                 }
+
                             }
                         }
                     }
                 }
                 Text(text = "Tareas")
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, color = Color.Black)){
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, color = Color.Black)
+                ) {
 
-                    Column(modifier = Modifier.fillMaxWidth()){
+                    Column(modifier = Modifier.fillMaxWidth()) {
 
-                        Row (horizontalArrangement = Arrangement.SpaceAround){
-                            Text(text = "Nombre", Modifier.weight(2.5f), fontWeight = FontWeight.Bold)
-                            Text(text = "Hora de inicio", Modifier.weight(2f), fontWeight = FontWeight.Bold)
+                        Row(horizontalArrangement = Arrangement.SpaceAround) {
+                            Text(
+                                text = "Nombre",
+                                Modifier.weight(2.5f),
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Hora de inicio",
+                                Modifier.weight(2f),
+                                fontWeight = FontWeight.Bold
+                            )
                             Text(text = "Cumplida", fontWeight = FontWeight.Bold)
                         }
-                        LazyColumn(contentPadding = PaddingValues(vertical = 5.dp), content = {
-                            items(8) {
-                                ItemCalendario(nombreTarea = "Nombre", horaTarea ="21:00" )
-                                Spacer(modifier = Modifier.size(10.dp))
-                            }
 
+                        listTask(task = listaTask)
 
-                        })
                     }
                 }
-
-
 
 
             }
@@ -238,13 +241,17 @@ fun EmptySpace(day: Int) {
 fun DayItem(
     day: Int,
     month: Int,
-    fechaSeleccionada: Date?,
-    onDateSelected: (Date) -> Unit
+    fechaSeleccionada: Long?,
+    onDateSelected: (Long) -> Unit
 ) {
-    val selectedDate = Calendar.getInstance().apply {
+    val selectedDateInMillis = Calendar.getInstance().apply {
         set(Calendar.MONTH, month)
         set(Calendar.DAY_OF_MONTH, day)
-    }.time
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }.timeInMillis
 
     val context = LocalContext.current
     Box(
@@ -252,7 +259,12 @@ fun DayItem(
             .clip(CutCornerShape(10.dp))
             .padding(4.dp)
             .background(
-                if (selectedDate == fechaSeleccionada) Color(63, 81, 181, 255) else Color(
+                if (selectedDateInMillis / 1000 == fechaSeleccionada) Color(
+                    63,
+                    81,
+                    181,
+                    255
+                ) else Color(
                     33,
                     150,
                     243,
@@ -261,17 +273,9 @@ fun DayItem(
             )
             .size(40.dp)
             .clickable {
-                onDateSelected(selectedDate)
+                onDateSelected(selectedDateInMillis / 1000)
                 val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                val dateString = dateFormat.format(selectedDate)
-                Toast
-                    .makeText(
-                        context,
-                        "Fecha seleccionada: $dateString",
-                        Toast.LENGTH_SHORT
-                    )
-                    .show()
-
+                val dateString = dateFormat.format(selectedDateInMillis)
             },
         contentAlignment = Alignment.Center
     ) {
@@ -282,4 +286,20 @@ fun DayItem(
             fontFamily = FontFamily.Monospace
         )
     }
+}
+
+@Composable
+fun listTask(task: List<TaskModel>) {
+    LazyColumn(contentPadding = PaddingValues(vertical = 5.dp), content = {
+        items(task, key = { it.id }) { task ->
+            ItemCalendario(task)
+            Spacer(modifier = Modifier.size(10.dp))
+        }
+        item() {
+            Box(modifier = Modifier.background(Color.Red))
+
+        }
+
+
+    })
 }
