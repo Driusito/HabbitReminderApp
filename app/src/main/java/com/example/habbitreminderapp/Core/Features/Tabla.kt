@@ -46,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -71,30 +72,34 @@ fun ItemLista(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato
 
     val coroutineScope = rememberCoroutineScope()
     var currentTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    val context= LocalContext.current
 
     var showError by remember { mutableStateOf(false) }
 
+    // Variable para almacenar los segundos actuales
+    var currentTimestampSeconds by remember { mutableStateOf(System.currentTimeMillis() / 1000) }
+
     LaunchedEffect(Unit) {
         while (true) {
-            currentTime = System.currentTimeMillis()
+            currentTimestampSeconds = System.currentTimeMillis() / 1000
+            Log.i("Current Timestamp Seconds", currentTimestampSeconds.toString())
             delay(1000) // Update every second
         }
+    }
+    if (currentTimestampSeconds >= taskModel.fecha && currentTimestampSeconds <= taskModel.proximaFecha) {
+        Log.i("Noti", "Aqui toy")
+        viewModel.sendNotification(context = context, taskModel)
     }
     Box(
         modifier = Modifier
             .padding(10.dp)
             .clickable {
-                val currentTimestampSeconds = currentTime / 1000
-                Log.i("Hora", currentTimestampSeconds.toString())
-                Log.i("Hora 2", taskModel.fecha.toString())
-                Log.i("Hora 3", taskModel.proximaFecha.toString())
-                if (currentTimestampSeconds >= taskModel.fecha && currentTimestampSeconds <= taskModel.proximaFecha) {
-                    coroutineScope.launch {
+//                val currentTimestampSeconds = currentTime / 1000
+//                Log.i("Hora", currentTimestampSeconds.toString())
+//                Log.i("Hora 2", taskModel.fecha.toString())
+//                Log.i("Hora 3", taskModel.proximaFecha.toString())
 
-                    }
-                } else {
-                    showError = true
-                }
+
 
             }
             .clip(RoundedCornerShape(12.dp))
