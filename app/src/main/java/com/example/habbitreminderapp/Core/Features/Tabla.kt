@@ -73,6 +73,9 @@ fun ItemLista(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato
     val coroutineScope = rememberCoroutineScope()
     var currentTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
     val context= LocalContext.current
+    var comenzar by remember {
+        mutableStateOf(false)
+    }
 
     var showError by remember { mutableStateOf(false) }
 
@@ -86,9 +89,9 @@ fun ItemLista(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato
             delay(1000) // Update every second
         }
     }
-    if (currentTimestampSeconds >= taskModel.fecha && currentTimestampSeconds <= taskModel.proximaFecha) {
-        Log.i("Noti", "Aqui toy")
+    if (!comenzar&&currentTimestampSeconds >= taskModel.fecha && currentTimestampSeconds <= taskModel.proximaFecha) {
         viewModel.sendNotification(context = context, taskModel)
+        comenzar=true
     }
     Box(
         modifier = Modifier
@@ -98,7 +101,6 @@ fun ItemLista(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato
 //                Log.i("Hora", currentTimestampSeconds.toString())
 //                Log.i("Hora 2", taskModel.fecha.toString())
 //                Log.i("Hora 3", taskModel.proximaFecha.toString())
-
 
 
             }
