@@ -91,7 +91,7 @@ fun ItemLista(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato
         viewModel.sendNotification(context = context, taskModel)
         comenzar = true
     }
-    val icon=if(currentTimestampSeconds >= taskModel.proximaFecha){Icons.Default.LockOpen}
+    val icon=if(currentTimestampSeconds >= taskModel.fecha){Icons.Default.LockOpen}
     else Icons.Default.Lock
 
     Box(
@@ -240,7 +240,6 @@ fun Pagina(
                             coroutineScope.launch {
                                 Log.i("Cronologia", "Era ${it.toString()}")
                                 myTaskTableViewModel.setOverDueTasks(task.id, taskModel = task)
-
                                 Log.i("Cronologia", "Soy ${it.toString()}")
 
                             }
