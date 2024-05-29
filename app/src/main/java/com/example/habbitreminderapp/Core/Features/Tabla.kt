@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -24,6 +25,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DoneOutline
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissState
 import androidx.compose.material3.DismissValue
@@ -68,15 +71,10 @@ import java.util.concurrent.TimeUnit
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ItemLista(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato: Int) {
-
-
     val coroutineScope = rememberCoroutineScope()
     var currentTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    val context= LocalContext.current
-    var comenzar by remember {
-        mutableStateOf(false)
-    }
-
+    val context = LocalContext.current
+    var comenzar by remember { mutableStateOf(false) }
     var showError by remember { mutableStateOf(false) }
 
     // Variable para almacenar los segundos actuales
@@ -89,25 +87,37 @@ fun ItemLista(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato
             delay(1000) // Update every second
         }
     }
-    if (!comenzar&&currentTimestampSeconds >= taskModel.fecha && currentTimestampSeconds <= taskModel.proximaFecha) {
+    if (!comenzar && currentTimestampSeconds >= taskModel.fecha && currentTimestampSeconds <= taskModel.proximaFecha) {
         viewModel.sendNotification(context = context, taskModel)
-        comenzar=true
+        comenzar = true
     }
+    val icon=if(currentTimestampSeconds >= taskModel.proximaFecha){Icons.Default.LockOpen}
+    else Icons.Default.Lock
+
     Box(
         modifier = Modifier
             .padding(10.dp)
-            .clickable {
-//                val currentTimestampSeconds = currentTime / 1000
-//                Log.i("Hora", currentTimestampSeconds.toString())
-//                Log.i("Hora 2", taskModel.fecha.toString())
-//                Log.i("Hora 3", taskModel.proximaFecha.toString())
-
-
-            }
+            .clickable {}
             .clip(RoundedCornerShape(12.dp))
             .background(Color(taskModel.color))
             .fillMaxWidth(.9f)
     ) {
+        // Icono en la esquina superior derecha
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.TopEnd
+        ) {
+            Icon(
+                imageVector = icon, // Puedes cambiar este ícono por el que prefieras
+                contentDescription = "Icono en la esquina superior derecha",
+                modifier = Modifier
+                    .padding(8.dp)
+                    .size(24.dp),
+                tint = Color.White // Cambia el color del ícono si es necesario
+            )
+        }
+
         if (showError) {
             Snackbar(
                 action = {
@@ -119,21 +129,19 @@ fun ItemLista(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato
                 Text(text = "¡Aún no ha llegado la hora!")
             }
         }
+
         Row(
             Modifier
                 .padding(10.dp)
                 .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
         ) {
-
             Box(modifier = Modifier.weight(2.5f)) {
-
                 Text(
                     text = taskModel.nombre,
                     color = Color.White,
                     overflow = TextOverflow.Ellipsis,
                     fontFamily = FontFamily(Font(R.font.lato_regular))
                 )
-
             }
             Spacer(modifier = Modifier.weight(.5f))
 
@@ -153,7 +161,6 @@ fun ItemLista(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato
                 DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
             }
             val formattedTime = date.format(formatter)
-
 
             Box(
                 contentAlignment = Alignment.Center, modifier = Modifier
@@ -177,6 +184,7 @@ fun Pagina(
 ) {
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    Log.d("Pagina", "tasksToday: ${tasksToday.size}, tasksTomorrow: ${tasksTomorrow.size}, tasksComing: ${tasksComing.size}")
 
     Box(
         modifier = Modifier
@@ -209,8 +217,9 @@ fun Pagina(
             items(tasksToday, key = { it.id }) { task ->
                 var isRemoved by remember(task.id) { mutableStateOf(false) }
                 var isDone by remember(task.id) { mutableStateOf(false) }
+                var isPassed by remember(task.id) { mutableStateOf(false) }
 
-                if (!isRemoved && !isDone) {
+                if (!isRemoved && !isDone && !isPassed) {
                     SwipeToDeleteOrCompleteItem(
                         item = task,
                         onDelete = {
@@ -223,6 +232,17 @@ fun Pagina(
                             isDone = true
                             coroutineScope.launch {
                                 myTaskTableViewModel.setDoneTask(task.id, task)
+                            }
+                        }, timeToDone = task.fecha,
+                        timeToPass = task.proximaFecha,
+                        onPassed = {
+                            isPassed = true
+                            coroutineScope.launch {
+                                Log.i("Cronologia", "Era ${it.toString()}")
+                                myTaskTableViewModel.setOverDueTasks(task.id, taskModel = task)
+
+                                Log.i("Cronologia", "Soy ${it.toString()}")
+
                             }
                         },
                         content = { item -> ItemLista(item, myTaskTableViewModel, 0) }
@@ -368,11 +388,33 @@ fun <T> SwipeToDeleteOrCompleteItem(
     item: T,
     onDelete: (T) -> Unit,
     onDone: (T) -> Unit,
+    onPassed: (T) -> Unit,
+    timeToPass: Long,
+    timeToDone: Long, // Parámtero que contiene la fecha límite para permitir el swipe a la derecha
     animationDuration: Int = 500,
     content: @Composable (T) -> Unit
 ) {
+    var currentTimestampSeconds by remember { mutableStateOf(System.currentTimeMillis() / 1000) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            currentTimestampSeconds = System.currentTimeMillis() / 1000
+            Log.i("Current Timestamp Seconds", currentTimestampSeconds.toString())
+            delay(1000) // Update every second
+        }
+    }
     var isRemoved by remember { mutableStateOf(false) }
     var isDone by remember { mutableStateOf(false) }
+
+    if (currentTimestampSeconds >= timeToPass)
+        onPassed(item)
+
+    val dismissDirections = if (currentTimestampSeconds >= timeToDone) {
+        setOf(DismissDirection.EndToStart, DismissDirection.StartToEnd)
+    } else {
+        setOf(DismissDirection.EndToStart) // Only allow swipe to delete
+    }
+    val context = LocalContext.current
     val state = rememberDismissState(
         confirmValueChange = { value ->
             when (value) {
@@ -382,8 +424,12 @@ fun <T> SwipeToDeleteOrCompleteItem(
                 }
 
                 DismissValue.DismissedToEnd -> {
-                    isDone = true
-                    true
+                    if (currentTimestampSeconds >= timeToDone) {
+                        isDone = true
+                        true
+                    } else {
+                        false
+                    }
                 }
 
                 else -> false
@@ -419,7 +465,7 @@ fun <T> SwipeToDeleteOrCompleteItem(
                 }
             },
             dismissContent = { content(item) },
-            directions = setOf(DismissDirection.EndToStart, DismissDirection.StartToEnd)
+            directions = dismissDirections
         )
     }
 }

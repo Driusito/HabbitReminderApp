@@ -36,8 +36,8 @@ interface TaskDao {
     @Query("Select Max(id)+1 from TaskEntity")
     fun getNextId():Int
 
-    @Query("UPDATE TaskEntity SET cumplidaTarea = 2 WHERE fechaTarea < :endOfDay AND cumplidaTarea = 0")
-    suspend fun updateOverdueTasks(endOfDay: Long)
+    @Query("UPDATE TaskEntity SET cumplidaTarea = 2 WHERE id=:id AND cumplidaTarea = 0")
+    suspend fun updateOverdueTasks(id: Int)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun  addTask(taskEntity: TaskEntity)

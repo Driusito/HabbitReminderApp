@@ -94,8 +94,15 @@ class MyTaskTableViewModel @Inject constructor(
         }
     }
 
-    suspend fun setOverDueTasks(){
-        setOverdueTaskUseCase()
+    suspend fun setOverDueTasks(id:Int,taskModel: TaskModel){
+        setOverdueTaskUseCase(id)
+        addTask(
+            taskModel.copy(
+                id = id,
+                fecha = taskModel.proximaFecha,
+                proximaFecha = taskModel.proximaFecha + taskModel.margen
+            )
+        )
     }
 
     suspend fun deleteTask(taskModel: TaskModel){
