@@ -80,17 +80,9 @@ fun MyTaskScreens(
                     selectedIcon = Icons.Default.CalendarMonth
                 )
             )
-            val pantallas = listOf(
-                Pagina(
-                    myTaskTableViewModel,
-                    (uiStateToday as MyTaskTableUiState.Success).tasks,
-                    (uiStateTomorrow as MyTaskTableUiState.Success).tasks,
-                    (uiStateComing as MyTaskTableUiState.Success).tasks
-                ),
-                CustomCalendar(myTaskCalendarViewModel)
-            )
+
             var selectedTabIndex by remember { mutableIntStateOf(0) }
-            val pagerState = rememberPagerState { pantallas.size }
+            val pagerState = rememberPagerState { 2 }
 
             LaunchedEffect(selectedTabIndex) {
                 pagerState.animateScrollToPage(selectedTabIndex)

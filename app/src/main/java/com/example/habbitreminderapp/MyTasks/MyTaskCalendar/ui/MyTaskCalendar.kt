@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,6 +49,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.habbitreminderapp.Core.Features.CustomCalendar
@@ -67,11 +70,22 @@ fun CustomCalendar(myTaskCalendarViewModel: MyTaskCalendarViewModel) {
     val uiStateForDay by myTaskCalendarViewModel.uiStateForDay.observeAsState(initial = MyTaskTableUiState.Loading)
     val allTasks by myTaskCalendarViewModel.allTasks.observeAsState(initial = emptyList())
 
+    var showDialog by remember { mutableStateOf(false) } // Controla si se debe mostrar el diálogo
+
     when (uiStateForDay) {
         is MyTaskTableUiState.Error -> Text(text = "Error al cargar calendario")
-        is MyTaskTableUiState.Loading -> CircularProgressIndicator()
+        is MyTaskTableUiState.Loading -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+            ) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
         is MyTaskTableUiState.Success -> {
             val listaTask = (uiStateForDay as MyTaskTableUiState.Success).tasks
+            Log.e("Lista",listaTask.toString())
             val calendar = Calendar.getInstance().apply {
                 set(Calendar.MONTH, mes)
                 firstDayOfWeek = Calendar.MONDAY
@@ -151,7 +165,10 @@ fun CustomCalendar(myTaskCalendarViewModel: MyTaskCalendarViewModel) {
                                 EmptySpace(day)
                             else if (day in 1..daysInMonth) {
                                 DayItem(day, mes, allTasks, fechaSeleccionada) { fecha ->
+                                    myTaskCalendarViewModel.setDay(0)
                                     myTaskCalendarViewModel.setDay(fecha * 1000)
+                                    val formattedDate = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date(fecha * 1000))
+                                    showDialog = true // Mostrar el diálogo cuando se hace clic en un día
                                 }
                             }
                         }
@@ -178,7 +195,10 @@ fun CustomCalendar(myTaskCalendarViewModel: MyTaskCalendarViewModel) {
                             )
                             Text(text = "Cumplida", fontWeight = FontWeight.Bold)
                         }
-                        listTask(task = listaTask)
+                        listTask(task = listaTask, show = showDialog) {
+                            myTaskCalendarViewModel.setDay(0)
+                            showDialog = false // Ocultar el diálogo cuando se cierra
+                        }
                     }
                 }
             }
@@ -230,7 +250,12 @@ fun DayItem(
         taskTime in selectedDateInMillis..endDateInMillis
     }
 
-    val context = LocalContext.current
+    val filteredTasks = taskList.filter { task ->
+        val taskTime = task.fecha * 1000 // Assuming startTime is in seconds, convert to milliseconds
+        taskTime in selectedDateInMillis..endDateInMillis
+    }
+    val numTaskCompleted = filteredTasks.count { it.cumplida == 1 }
+
     Box(
         modifier = Modifier
             .clip(CutCornerShape(10.dp))
@@ -238,11 +263,28 @@ fun DayItem(
             .size(40.dp)
             .border(BorderStroke(2.dp, Color.Black))
             .background(
-                color = if (hasTasks) Color.Red else Color.Transparent,
+                color = if (hasTasks && numTaskCompleted ==filteredTasks.size)
+                {
+                    Color.Green
+                }
+                else if (hasTasks && numTaskCompleted >= filteredTasks.size/2){
+
+                    Color.Yellow
+                }
+                else if (hasTasks && numTaskCompleted < filteredTasks.size/2){
+
+                    Color.Red
+                }
+                    else {
+                    Color.Transparent
+                },
                 shape = CutCornerShape(10.dp)
             )
             .clickable {
-                onDateSelected(selectedDateInMillis/1000)
+                // Primero, cierra el diálogo
+                onDateSelected(selectedDateInMillis / 1000)
+                // Luego, actualiza el estado de la fecha seleccionada
+                onDateSelected(selectedDateInMillis / 1000)
             },
         contentAlignment = Alignment.Center
     ) {
@@ -254,19 +296,53 @@ fun DayItem(
         )
     }
 }
-
 @Composable
-fun listTask(task: List<TaskModel>) {
-    LazyColumn(contentPadding = PaddingValues(vertical = 5.dp), content = {
-        items(task, key = { it.id }) { task ->
-            ItemCalendario(task)
-            Spacer(modifier = Modifier.size(10.dp))
-        }
-        item() {
-            Box(modifier = Modifier.background(Color.Red))
-
-        }
-
-
-    })
+fun listTask(task: List<TaskModel>, show: Boolean, onShow: () -> Unit) {
+    if (show && task.isNotEmpty()) {
+        Dialog(
+            onDismissRequest = { onShow() },
+            content = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth().background(Color.White)
+                        .height(500.dp)
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            IconButton(
+                                onClick = { onShow() },
+                                modifier = Modifier.padding(end = 8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Cerrar"
+                                )
+                            }
+                        }
+                        LazyColumn(
+                            contentPadding = PaddingValues(vertical = 5.dp),
+                            content = {
+                                items(task, key = { it.id }) { task ->
+                                    ItemCalendario(task)
+                                    Spacer(modifier = Modifier.size(10.dp))
+                                }
+                                item() {
+                                    Box(modifier = Modifier.background(Color.Red))
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        )
+    }
 }

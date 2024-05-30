@@ -10,6 +10,7 @@ import com.example.habbitreminderapp.Domain.GetTasksUseCase
 import com.example.habbitreminderapp.Model.data.TaskModel
 import com.example.habbitreminderapp.MyTasks.MyTaskTable.ui.MyTaskTableUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -19,6 +20,11 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
 
+
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.internal.synchronized
+import kotlinx.coroutines.sync.Mutex
 
 @HiltViewModel
 class MyTaskCalendarViewModel @Inject constructor(
@@ -38,18 +44,22 @@ class MyTaskCalendarViewModel @Inject constructor(
     private val _allTasks = MutableLiveData<List<TaskModel>>()
     val allTasks: LiveData<List<TaskModel>> = _allTasks
 
+    private var debounceJob: Job? = null
+
     init {
         fetchAllTasks()
-        _startTime.observeForever { fetchTasks() }
-        _endDay.observeForever { fetchTasks() }
+        _startTime.observeForever {
+            fetchTasks()
+        }
+        _endDay.observeForever {
+            fetchTasks()
+        }
     }
 
     private fun fetchAllTasks() {
         viewModelScope.launch {
             getTasksUseCase()
-                .catch { e ->
-                    Log.e("MyTaskCalendarViewModel", "Error fetching all tasks", e)
-                }
+                .catch { e -> Log.e("MyTaskCalendarViewModel", "Error fetching tasks", e) }
                 .collect { tasks ->
                     _allTasks.value = tasks
                 }
@@ -70,30 +80,29 @@ class MyTaskCalendarViewModel @Inject constructor(
                 }
         }
     }
-
     fun setDay(dayInMillis: Long) {
-        val startCalendar = Calendar.getInstance().apply {
-            timeInMillis = dayInMillis
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        _startTime.value = startCalendar.timeInMillis / 1000
+            viewModelScope.launch {
+                val startCalendar = Calendar.getInstance().apply {
+                    timeInMillis = dayInMillis
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                _startTime.value = startCalendar.timeInMillis / 1000
 
-        val endCalendar = Calendar.getInstance().apply {
-            timeInMillis = dayInMillis
-            set(Calendar.HOUR_OF_DAY, 23)
-            set(Calendar.MINUTE, 59)
-            set(Calendar.SECOND, 59)
-            set(Calendar.MILLISECOND, 999)
-        }
-        _endDay.value = endCalendar.timeInMillis / 1000
+                val endCalendar = Calendar.getInstance().apply {
+                    timeInMillis = dayInMillis
+                    set(Calendar.HOUR_OF_DAY, 23)
+                    set(Calendar.MINUTE, 59)
+                    set(Calendar.SECOND, 59)
+                    set(Calendar.MILLISECOND, 999)
+                }
+                _endDay.value = endCalendar.timeInMillis / 1000
 
-        Log.i("Principio dia", _startTime.value.toString())
-        Log.i("Fin dia", _endDay.value.toString())
+                Log.i("Principio dia", _startTime.value.toString())
+                Log.i("Fin dia", _endDay.value.toString())
+            }
+        }
     }
-}
-
-
 
