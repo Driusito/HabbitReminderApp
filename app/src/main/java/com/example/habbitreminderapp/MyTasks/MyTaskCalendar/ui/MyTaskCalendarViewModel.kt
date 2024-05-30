@@ -6,6 +6,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.habbitreminderapp.Domain.GetTasksForDayUseCase
+import com.example.habbitreminderapp.Domain.GetTasksUseCase
+import com.example.habbitreminderapp.Model.data.TaskModel
 import com.example.habbitreminderapp.MyTasks.MyTaskTable.ui.MyTaskTableUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,65 +20,80 @@ import java.util.Calendar
 import javax.inject.Inject
 
 
-    @HiltViewModel
-    class MyTaskCalendarViewModel @Inject constructor(
-        private val getTasksForDayUseCase: GetTasksForDayUseCase
-    ) : ViewModel() {
+@HiltViewModel
+class MyTaskCalendarViewModel @Inject constructor(
+    private val getTasksForDayUseCase: GetTasksForDayUseCase,
+    private val getTasksUseCase: GetTasksUseCase
+) : ViewModel() {
 
-        private val _startTime = MutableLiveData<Long>(0L)
-        val startTime: LiveData<Long> = _startTime
+    private val _startTime = MutableLiveData<Long>(0L)
+    val startTime: LiveData<Long> = _startTime
 
-        private val _endDay = MutableLiveData<Long>(0L)
-        val endDay: LiveData<Long> = _endDay
+    private val _endDay = MutableLiveData<Long>(0L)
+    val endDay: LiveData<Long> = _endDay
 
-        private val _uiStateForDay = MutableLiveData<MyTaskTableUiState>()
-        val uiStateForDay: LiveData<MyTaskTableUiState> = _uiStateForDay
+    private val _uiStateForDay = MutableLiveData<MyTaskTableUiState>()
+    val uiStateForDay: LiveData<MyTaskTableUiState> = _uiStateForDay
 
-        init {
-            _startTime.observeForever {
-                fetchTasks()
-            }
-            _endDay.observeForever {
-                fetchTasks()
-            }
-        }
+    private val _allTasks = MutableLiveData<List<TaskModel>>()
+    val allTasks: LiveData<List<TaskModel>> = _allTasks
 
-        private fun fetchTasks() {
-            val startTimeValue = _startTime.value ?: return
-            val endDayValue = _endDay.value ?: return
+    init {
+        fetchAllTasks()
+        _startTime.observeForever { fetchTasks() }
+        _endDay.observeForever { fetchTasks() }
+    }
 
-            viewModelScope.launch {
-                getTasksForDayUseCase(startTimeValue, endDayValue)
-                    .catch { e ->
-                        _uiStateForDay.value = MyTaskTableUiState.Error(e)
-                    }
-                    .collect { tasks ->
-                        _uiStateForDay.value = MyTaskTableUiState.Success(tasks)
-                    }
-            }
-        }
-
-        fun setDay(dayInMillis: Long) {
-            val startCalendar = Calendar.getInstance().apply {
-                timeInMillis = dayInMillis
-                set(Calendar.HOUR_OF_DAY, 0)
-                set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-            }
-            _startTime.value = startCalendar.timeInMillis / 1000
-
-            val endCalendar = Calendar.getInstance().apply {
-                timeInMillis = dayInMillis
-                set(Calendar.HOUR_OF_DAY, 23)
-                set(Calendar.MINUTE, 59)
-                set(Calendar.SECOND, 59)
-                set(Calendar.MILLISECOND, 999)
-            }
-            _endDay.value = endCalendar.timeInMillis / 1000
-
-            Log.i("Principio dia", _startTime.value.toString())
-            Log.i("Fin dia", _endDay.value.toString())
+    private fun fetchAllTasks() {
+        viewModelScope.launch {
+            getTasksUseCase()
+                .catch { e ->
+                    Log.e("MyTaskCalendarViewModel", "Error fetching all tasks", e)
+                }
+                .collect { tasks ->
+                    _allTasks.value = tasks
+                }
         }
     }
+
+    private fun fetchTasks() {
+        val startTimeValue = _startTime.value ?: return
+        val endDayValue = _endDay.value ?: return
+
+        viewModelScope.launch {
+            getTasksForDayUseCase(startTimeValue, endDayValue)
+                .catch { e ->
+                    _uiStateForDay.value = MyTaskTableUiState.Error(e)
+                }
+                .collect { tasks ->
+                    _uiStateForDay.value = MyTaskTableUiState.Success(tasks)
+                }
+        }
+    }
+
+    fun setDay(dayInMillis: Long) {
+        val startCalendar = Calendar.getInstance().apply {
+            timeInMillis = dayInMillis
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        _startTime.value = startCalendar.timeInMillis / 1000
+
+        val endCalendar = Calendar.getInstance().apply {
+            timeInMillis = dayInMillis
+            set(Calendar.HOUR_OF_DAY, 23)
+            set(Calendar.MINUTE, 59)
+            set(Calendar.SECOND, 59)
+            set(Calendar.MILLISECOND, 999)
+        }
+        _endDay.value = endCalendar.timeInMillis / 1000
+
+        Log.i("Principio dia", _startTime.value.toString())
+        Log.i("Fin dia", _endDay.value.toString())
+    }
+}
+
+
 

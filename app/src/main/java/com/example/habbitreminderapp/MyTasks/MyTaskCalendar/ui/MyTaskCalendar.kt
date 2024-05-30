@@ -2,6 +2,7 @@ package com.example.habbitreminderapp.MyTasks.MyTaskCalendar.ui
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -64,11 +65,7 @@ fun CustomCalendar(myTaskCalendarViewModel: MyTaskCalendarViewModel) {
     var mes by remember { mutableStateOf(calendar.get(Calendar.MONTH)) }
     val fechaSeleccionada: Long by myTaskCalendarViewModel.startTime.observeAsState(initial = 0L)
     val uiStateForDay by myTaskCalendarViewModel.uiStateForDay.observeAsState(initial = MyTaskTableUiState.Loading)
-
-
-    val lifeCycle = LocalLifecycleOwner.current.lifecycle
-
-
+    val allTasks by myTaskCalendarViewModel.allTasks.observeAsState(initial = emptyList())
 
     when (uiStateForDay) {
         is MyTaskTableUiState.Error -> Text(text = "Error al cargar calendario")
@@ -77,7 +74,7 @@ fun CustomCalendar(myTaskCalendarViewModel: MyTaskCalendarViewModel) {
             val listaTask = (uiStateForDay as MyTaskTableUiState.Success).tasks
             val calendar = Calendar.getInstance().apply {
                 set(Calendar.MONTH, mes)
-                firstDayOfWeek = Calendar.MONDAY // Establecer el primer día de la semana en lunes
+                firstDayOfWeek = Calendar.MONDAY
             }
             val daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
             val firstDayOfMonth = calendar.apply { set(Calendar.DAY_OF_MONTH, 1) }
@@ -95,26 +92,22 @@ fun CustomCalendar(myTaskCalendarViewModel: MyTaskCalendarViewModel) {
                     .background(Color.White)
                     .padding(20.dp)
             ) {
-                //Cabecera(mes)
                 Row(
                     Modifier
                         .fillMaxWidth()
                         .padding(4.dp), verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = meses[firstDayOfMonth.get(Calendar.MONTH)] + " $year",
+                        text = "${meses[firstDayOfMonth.get(Calendar.MONTH)]} $year",
                         style = MaterialTheme.typography.headlineLarge,
                         modifier = Modifier
                             .padding(vertical = 8.dp),
                         color = Color.Black
                     )
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-
-
                         IconButton(onClick = { mes-- }) {
                             Icon(
-                                modifier = Modifier
-                                    .size(50.dp),
+                                modifier = Modifier.size(50.dp),
                                 imageVector = Icons.Default.ChevronLeft,
                                 contentDescription = "Mes anterior"
                             )
@@ -122,29 +115,19 @@ fun CustomCalendar(myTaskCalendarViewModel: MyTaskCalendarViewModel) {
 
                         IconButton(onClick = { mes++ }) {
                             Icon(
-                                modifier = Modifier
-                                    .size(50.dp),
+                                modifier = Modifier.size(50.dp),
                                 imageVector = Icons.Default.ChevronRight,
-                                contentDescription = "Mes anterior"
+                                contentDescription = "Mes siguiente"
                             )
                         }
-
                     }
-
-
                 }
 
-
-                //Dias de la semana
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-
-                    ) {
+                Row(modifier = Modifier.fillMaxWidth()) {
                     daysOfWeek.forEach { day ->
                         Text(
                             textAlign = TextAlign.Center,
                             text = day,
-
                             fontSize = 20.sp,
                             modifier = Modifier
                                 .padding(4.dp)
@@ -156,46 +139,32 @@ fun CustomCalendar(myTaskCalendarViewModel: MyTaskCalendarViewModel) {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                //Dias del mes
-                val startingDay =
-                    (firstDayOfWeek - 2 + 7) % 7 // Ajustado para que el primer día sea el día 1 del mes
+                val startingDay = (firstDayOfWeek - 2 + 7) % 7
                 val totalDays = daysInMonth + startingDay
                 val rows = (totalDays / 7) + if (totalDays % 7 > 0) 1 else 0
-                (0 until 31).forEach { rowIndex ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        //Hardcodeado para que muestre a partir del segundo día
-                        //pero basta con que se consiga el primer día de la semana, del mes
-                        // Hay que tener en cuenta que la cuenta se empieza desde el domingo
-                        //Y tambien empieza por 1, por lo que para que señale al lunes, deberia ser el 2
+
+                (0 until rows).forEach { rowIndex ->
+                    Row(modifier = Modifier.fillMaxWidth()) {
                         for (colIndex in 0 until 7) {
                             val day = rowIndex * 7 + colIndex - startingDay + 1
-                            //Si no empieza el mes, un "hueco", si no el day
                             if (((colIndex < firstDayOfWeek - 2 && day < firstDayOfWeek - 2) && rowIndex == 0) || (firstDayOfWeek == 1 && rowIndex == 0 && colIndex != 6))
-                                EmptySpace(
-                                    day
-                                ) else if (day in 1..daysInMonth) {
-                                DayItem(day, mes, fechaSeleccionada) { fecha ->
+                                EmptySpace(day)
+                            else if (day in 1..daysInMonth) {
+                                DayItem(day, mes, allTasks, fechaSeleccionada) { fecha ->
                                     myTaskCalendarViewModel.setDay(fecha * 1000)
-                                    Log.e("Tamaño", listaTask.size.toString())
-                                    Log.e("Dia seleccionado", fecha.toString())
-
                                 }
-
                             }
                         }
                     }
                 }
+
                 Text(text = "Tareas")
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .border(1.dp, color = Color.Black)
                 ) {
-
                     Column(modifier = Modifier.fillMaxWidth()) {
-
                         Row(horizontalArrangement = Arrangement.SpaceAround) {
                             Text(
                                 text = "Nombre",
@@ -209,19 +178,12 @@ fun CustomCalendar(myTaskCalendarViewModel: MyTaskCalendarViewModel) {
                             )
                             Text(text = "Cumplida", fontWeight = FontWeight.Bold)
                         }
-
                         listTask(task = listaTask)
-
                     }
                 }
-
-
             }
         }
-
     }
-
-
 }
 
 @Composable
@@ -241,6 +203,7 @@ fun EmptySpace(day: Int) {
 fun DayItem(
     day: Int,
     month: Int,
+    taskList: List<TaskModel>,
     fechaSeleccionada: Long?,
     onDateSelected: (Long) -> Unit
 ) {
@@ -253,37 +216,41 @@ fun DayItem(
         set(Calendar.MILLISECOND, 0)
     }.timeInMillis
 
+    val endDateInMillis = Calendar.getInstance().apply {
+        set(Calendar.MONTH, month)
+        set(Calendar.DAY_OF_MONTH, day)
+        set(Calendar.HOUR_OF_DAY, 23)
+        set(Calendar.MINUTE, 59)
+        set(Calendar.SECOND, 59)
+        set(Calendar.MILLISECOND, 999)
+    }.timeInMillis
+
+    val hasTasks = taskList.any { task ->
+        val taskTime = task.fecha * 1000 // Assuming startTime is in seconds, convert to milliseconds
+        taskTime in selectedDateInMillis..endDateInMillis
+    }
+
     val context = LocalContext.current
     Box(
         modifier = Modifier
             .clip(CutCornerShape(10.dp))
             .padding(4.dp)
-            .background(
-                if (selectedDateInMillis / 1000 == fechaSeleccionada) Color(
-                    63,
-                    81,
-                    181,
-                    255
-                ) else Color(
-                    33,
-                    150,
-                    243,
-                    255
-                )
-            )
             .size(40.dp)
+            .border(BorderStroke(2.dp, Color.Black))
+            .background(
+                color = if (hasTasks) Color.Red else Color.Transparent,
+                shape = CutCornerShape(10.dp)
+            )
             .clickable {
-                onDateSelected(selectedDateInMillis / 1000)
-                val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                val dateString = dateFormat.format(selectedDateInMillis)
+                onDateSelected(selectedDateInMillis/1000)
             },
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = day.toString(),
-            color = Color.White,
-            fontSize = 16.sp,
-            fontFamily = FontFamily.Monospace
+            textAlign = TextAlign.Center,
+            fontSize = 20.sp,
+            color = Color.Black
         )
     }
 }
