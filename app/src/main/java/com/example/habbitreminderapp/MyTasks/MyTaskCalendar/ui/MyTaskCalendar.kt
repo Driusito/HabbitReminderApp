@@ -165,7 +165,7 @@ fun CustomCalendar(myTaskCalendarViewModel: MyTaskCalendarViewModel) {
                                 EmptySpace(day)
                             else if (day in 1..daysInMonth) {
                                 DayItem(day, mes, allTasks, fechaSeleccionada) { fecha ->
-                                    myTaskCalendarViewModel.setDay(0)
+                                    showDialog=false
                                     myTaskCalendarViewModel.setDay(fecha * 1000)
                                     val formattedDate = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date(fecha * 1000))
                                     showDialog = true // Mostrar el diálogo cuando se hace clic en un día
