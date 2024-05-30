@@ -10,7 +10,6 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,9 +21,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DoneOutline
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.DismissDirection
@@ -52,7 +51,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -91,8 +89,10 @@ fun ItemLista(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato
         viewModel.sendNotification(context = context, taskModel)
         comenzar = true
     }
-    val icon=if(currentTimestampSeconds >= taskModel.fecha){Icons.Default.LockOpen}
+    val icon=if(currentTimestampSeconds >= taskModel.fecha&&currentTimestampSeconds<taskModel.proximaFecha){Icons.Default.LockOpen}else if(currentTimestampSeconds>=taskModel.proximaFecha){Icons.Default.Cancel}
     else Icons.Default.Lock
+
+
 
     Box(
         modifier = Modifier
@@ -185,7 +185,9 @@ fun Pagina(
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     Log.d("Pagina", "tasksToday: ${tasksToday.size}, tasksTomorrow: ${tasksTomorrow.size}, tasksComing: ${tasksComing.size}")
-
+    var numero by remember {
+        mutableStateOf(0)
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -231,6 +233,7 @@ fun Pagina(
                         onDone = {
                             isDone = true
                             coroutineScope.launch {
+                                Log.i("Info","El id de la task es ${task.id}")
                                 myTaskTableViewModel.setDoneTask(task.id, task)
                             }
                         }, timeToDone = task.fecha,
@@ -239,12 +242,13 @@ fun Pagina(
                             isPassed = true
                             coroutineScope.launch {
                                 Log.i("Cronologia", "Era ${it.toString()}")
-                                myTaskTableViewModel.setOverDueTasks(task.id, taskModel = task)
+                                myTaskTableViewModel.setOverDueTasks(task.id, taskModel = task )
+                                numero++
                                 Log.i("Cronologia", "Soy ${it.toString()}")
 
                             }
                         },
-                        content = { item -> ItemLista(item, myTaskTableViewModel, 0) }
+                        content = { ItemLista(task, myTaskTableViewModel, 0) }
                     )
                 }
             }
@@ -404,9 +408,14 @@ fun <T> SwipeToDeleteOrCompleteItem(
     }
     var isRemoved by remember { mutableStateOf(false) }
     var isDone by remember { mutableStateOf(false) }
+    var isPassed by remember {
+        mutableStateOf(false)
+    }
 
-    if (currentTimestampSeconds >= timeToPass)
-        onPassed(item)
+//    if (currentTimestampSeconds >= timeToPass && !isPassed) {
+//        onPassed(item)
+//        isPassed = true
+//    }
 
     val dismissDirections = if (currentTimestampSeconds >= timeToDone) {
         setOf(DismissDirection.EndToStart, DismissDirection.StartToEnd)
@@ -423,8 +432,11 @@ fun <T> SwipeToDeleteOrCompleteItem(
                 }
 
                 DismissValue.DismissedToEnd -> {
-                    if (currentTimestampSeconds >= timeToDone) {
+                    if (currentTimestampSeconds in timeToDone..<timeToPass) {
                         isDone = true
+                        true
+                    } else if (currentTimestampSeconds >= timeToPass) {
+                        isPassed = true
                         true
                     } else {
                         false
@@ -436,7 +448,7 @@ fun <T> SwipeToDeleteOrCompleteItem(
         }
     )
 
-    LaunchedEffect(isRemoved, isDone) {
+    LaunchedEffect(isRemoved, isDone,isPassed) {
         if (isRemoved) {
             delay(animationDuration.toLong())
             onDelete(item)
@@ -444,6 +456,10 @@ fun <T> SwipeToDeleteOrCompleteItem(
         if (isDone) {
             delay(animationDuration.toLong())
             onDone(item)
+        }
+        if (isPassed) {
+            delay(animationDuration.toLong())
+            onPassed(item)
         }
     }
 
