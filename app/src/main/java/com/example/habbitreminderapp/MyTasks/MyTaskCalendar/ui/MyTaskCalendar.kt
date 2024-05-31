@@ -83,9 +83,10 @@ fun CustomCalendar(myTaskCalendarViewModel: MyTaskCalendarViewModel) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
         }
+
         is MyTaskTableUiState.Success -> {
             val listaTask = (uiStateForDay as MyTaskTableUiState.Success).tasks
-            Log.e("Lista",listaTask.toString())
+            Log.e("Lista", listaTask.toString())
             val calendar = Calendar.getInstance().apply {
                 set(Calendar.MONTH, mes)
                 firstDayOfWeek = Calendar.MONDAY
@@ -165,10 +166,14 @@ fun CustomCalendar(myTaskCalendarViewModel: MyTaskCalendarViewModel) {
                                 EmptySpace(day)
                             else if (day in 1..daysInMonth) {
                                 DayItem(day, mes, allTasks, fechaSeleccionada) { fecha ->
-                                    showDialog=false
+                                    showDialog = false
                                     myTaskCalendarViewModel.setDay(fecha * 1000)
-                                    val formattedDate = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date(fecha * 1000))
-                                    showDialog = true // Mostrar el diálogo cuando se hace clic en un día
+                                    val formattedDate =
+                                        SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(
+                                            Date(fecha * 1000)
+                                        )
+                                    showDialog =
+                                        true // Mostrar el diálogo cuando se hace clic en un día
                                 }
                             }
                         }
@@ -246,15 +251,19 @@ fun DayItem(
     }.timeInMillis
 
     val hasTasks = taskList.any { task ->
-        val taskTime = task.fecha * 1000 // Assuming startTime is in seconds, convert to milliseconds
+        val taskTime =
+            task.fecha * 1000 // Assuming startTime is in seconds, convert to milliseconds
         taskTime in selectedDateInMillis..endDateInMillis
     }
 
     val filteredTasks = taskList.filter { task ->
-        val taskTime = task.fecha * 1000 // Assuming startTime is in seconds, convert to milliseconds
+        val taskTime =
+            task.fecha * 1000 // Assuming startTime is in seconds, convert to milliseconds
         taskTime in selectedDateInMillis..endDateInMillis
     }
     val numTaskCompleted = filteredTasks.count { it.cumplida == 1 }
+    val numTaskForDo = filteredTasks.count { it.cumplida == 0 }
+
 
     Box(
         modifier = Modifier
@@ -263,19 +272,15 @@ fun DayItem(
             .size(40.dp)
             .border(BorderStroke(2.dp, Color.Black))
             .background(
-                color = if (hasTasks && numTaskCompleted ==filteredTasks.size)
-                {
+                color = if (hasTasks && numTaskCompleted == filteredTasks.size) {
                     Color.Green
-                }
-                else if (hasTasks && numTaskCompleted >= filteredTasks.size/2){
+                } else if (hasTasks && (numTaskCompleted > 0 && numTaskCompleted < filteredTasks.size)) {
 
                     Color.Yellow
-                }
-                else if (hasTasks && numTaskCompleted < filteredTasks.size/2){
+                } else if (hasTasks && numTaskCompleted ==0) {
 
                     Color.Red
-                }
-                    else {
+                } else {
                     Color.Transparent
                 },
                 shape = CutCornerShape(10.dp)
@@ -296,6 +301,7 @@ fun DayItem(
         )
     }
 }
+
 @Composable
 fun listTask(task: List<TaskModel>, show: Boolean, onShow: () -> Unit) {
     if (show && task.isNotEmpty()) {
@@ -304,7 +310,8 @@ fun listTask(task: List<TaskModel>, show: Boolean, onShow: () -> Unit) {
             content = {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth().background(Color.White)
+                        .fillMaxWidth()
+                        .background(Color.White)
                         .height(500.dp)
                         .padding(horizontal = 16.dp)
                 ) {
