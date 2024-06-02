@@ -24,6 +24,8 @@ data class TaskEntity(
     var proximaFecha:Long=0L,
     @ColumnInfo(name = "cumplidaTarea")
     var cumplida:Int=0,
+    @ColumnInfo(name = "notiEnvidada")
+    var notificada:Int=0,
     @ColumnInfo(name = "categoriaIdTarea")
     var categoriaId:String=""
 )

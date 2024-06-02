@@ -39,6 +39,9 @@ interface TaskDao {
     @Query("UPDATE TaskEntity SET cumplidaTarea = 2 WHERE id=:id AND cumplidaTarea = 0")
     suspend fun updateOverdueTasks(id: Int)
 
+    @Query("UPDATE TaskEntity SET notiEnvidada = 1 WHERE id=:id AND cumplidaTarea = 0")
+    suspend fun setNofiticated(id: Int)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun  addTask(taskEntity: TaskEntity)
 

@@ -123,7 +123,8 @@ class NewTaskScreenViewModel @Inject constructor(private val addTaskUseCase: Add
             margen = margen,
             proximaFecha = _dateTask.value!! + margen,
             cumplida = 0,
-            categoriaId = _categoryEmoji.value ?: " "
+            categoriaId = _categoryEmoji.value ?: " ",
+            notificada = 0
         )
 
         viewModelScope.launch {

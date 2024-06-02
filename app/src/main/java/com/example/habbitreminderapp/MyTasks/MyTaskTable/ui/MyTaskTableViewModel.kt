@@ -1,7 +1,9 @@
 package com.example.habbitreminderapp.MyTasks.MyTaskTable.ui
 
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,8 +14,10 @@ import com.example.habbitreminderapp.Domain.GetTaskOfTodayUseCase
 import com.example.habbitreminderapp.Domain.GetTaskOfTomorrowUseCase
 import com.example.habbitreminderapp.Domain.GetTasksComing
 import com.example.habbitreminderapp.Domain.SetDoneTaskUseCase
+import com.example.habbitreminderapp.Domain.SetNotificatedUseCase
 import com.example.habbitreminderapp.Domain.SetOverdueTaskUseCase
 import com.example.habbitreminderapp.HabbitReminderApp
+import com.example.habbitreminderapp.MainActivity
 import com.example.habbitreminderapp.Model.data.TaskModel
 import com.example.habbitreminderapp.R
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,7 +39,8 @@ class MyTaskTableViewModel @Inject constructor(
     var setDoneTaskUseCase: SetDoneTaskUseCase,
     val getLastIdUseCase: GetLastIdUseCase,
     val setOverdueTaskUseCase: SetOverdueTaskUseCase,
-    val deleteTaskUseCase: DeleteTaskUseCase
+    val deleteTaskUseCase: DeleteTaskUseCase,
+    val setNotificatedUseCase: SetNotificatedUseCase
 ) : ViewModel() {
 
 
@@ -58,19 +63,36 @@ class MyTaskTableViewModel @Inject constructor(
 
 
     fun sendNotification(context: Context,taskModel: TaskModel){
-        val notificationManager=context.getSystemService(NotificationManager::class.java)
-        val notification=NotificationCompat.Builder(context,HabbitReminderApp.CHANNEL_ID)
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val notification = NotificationCompat.Builder(context, HabbitReminderApp.CHANNEL_ID)
             .setContentTitle(taskModel.nombre)
             .setContentText(taskModel.descripcion)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setAutoCancel(true)
+            .setContentIntent(pendingIntent)  // Set the PendingIntent
             .build()
-        notificationManager.notify(taskModel.nombre.hashCode(),notification)
+
+
+        // Get the NotificationManager and notify
+        val notificationManager = context.getSystemService(NotificationManager::class.java)
+        notificationManager.notify(taskModel.nombre.hashCode(), notification)
 
     }
     suspend fun getLastID(): Int {
         return withContext(Dispatchers.IO) {
             getLastIdUseCase()
+        }
+    }
+
+     fun setNotificated(id :Int){
+        viewModelScope.launch(Dispatchers.IO) {
+            setNotificatedUseCase(id)
+
         }
     }
 

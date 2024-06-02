@@ -23,6 +23,7 @@ class TaskRepository @Inject constructor(private val taskDao: TaskDao) {
                 it.margen,
                 it.proximaFecha,
                 it.cumplida,
+                it.notificada,
                 it.categoriaId
             )
         }
@@ -39,6 +40,7 @@ class TaskRepository @Inject constructor(private val taskDao: TaskDao) {
                 it.margen,
                 it.proximaFecha,
                 it.cumplida,
+                it.notificada,
                 it.categoriaId
             )
         }
@@ -55,6 +57,7 @@ class TaskRepository @Inject constructor(private val taskDao: TaskDao) {
                 it.margen,
                 it.proximaFecha,
                 it.cumplida,
+                it.notificada,
                 it.categoriaId
             )
         }
@@ -70,6 +73,7 @@ class TaskRepository @Inject constructor(private val taskDao: TaskDao) {
                 it.margen,
                 it.proximaFecha,
                 it.cumplida,
+                it.notificada,
                 it.categoriaId
             )
         }
@@ -87,6 +91,7 @@ class TaskRepository @Inject constructor(private val taskDao: TaskDao) {
                     it.margen,
                     it.proximaFecha,
                     it.cumplida,
+                    it.notificada,
                     it.categoriaId
                 )
             }
@@ -111,6 +116,7 @@ class TaskRepository @Inject constructor(private val taskDao: TaskDao) {
                 taskModel.margen,
                 taskModel.proximaFecha,
                 taskModel.cumplida,
+                taskModel.notificada,
                 taskModel.categoriaId
             )
         )
@@ -127,13 +133,17 @@ class TaskRepository @Inject constructor(private val taskDao: TaskDao) {
                 taskModel.margen,
                 taskModel.proximaFecha,
                 taskModel.cumplida,
+                taskModel.notificada,
                 taskModel.categoriaId
+
             )
         )
     }
 
 
-
+    suspend fun setNofiticated(id: Int){
+        taskDao.setNofiticated(id)
+    }
 
     suspend fun setTaskDone(id:Int) {
         taskDao.setDone(id)

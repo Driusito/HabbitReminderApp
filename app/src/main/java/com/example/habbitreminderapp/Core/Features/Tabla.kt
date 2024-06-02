@@ -1,5 +1,6 @@
 package com.example.habbitreminderapp.Core.Features
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -57,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import com.example.habbitreminderapp.Model.data.TaskModel
 import com.example.habbitreminderapp.MyTasks.MyTaskTable.ui.MyTaskTableViewModel
 import com.example.habbitreminderapp.R
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -66,6 +68,7 @@ import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ItemLista(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato: Int) {
@@ -85,8 +88,10 @@ fun ItemLista(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato
             delay(1000) // Update every second
         }
     }
-    if (!comenzar && currentTimestampSeconds >= taskModel.fecha && currentTimestampSeconds <= taskModel.proximaFecha) {
+    if (!comenzar && currentTimestampSeconds >= taskModel.fecha && currentTimestampSeconds <= taskModel.proximaFecha &&taskModel.notificada==0) {
         viewModel.sendNotification(context = context, taskModel)
+        Log.i("id",taskModel.id.toString())
+        viewModel.setNotificated(taskModel.id)
         comenzar = true
     }
     val icon=if(currentTimestampSeconds >= taskModel.fecha&&currentTimestampSeconds<taskModel.proximaFecha){Icons.Default.LockOpen}else if(currentTimestampSeconds>=taskModel.proximaFecha){Icons.Default.Cancel}

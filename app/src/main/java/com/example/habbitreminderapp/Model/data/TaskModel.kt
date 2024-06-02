@@ -13,7 +13,7 @@ data class TaskModel(
 
     val descripcion: String,
 
-    val fecha:Long,
+    val fecha: Long,
 
     val margen: Long,
 
@@ -21,6 +21,7 @@ data class TaskModel(
 
     val cumplida: Int,
 
+    val notificada: Int,
 
     val categoriaId: String
 
