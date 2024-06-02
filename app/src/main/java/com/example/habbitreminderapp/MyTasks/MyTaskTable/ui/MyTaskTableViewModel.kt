@@ -110,7 +110,8 @@ class MyTaskTableViewModel @Inject constructor(
                 taskModel.copy(
                     id = id,
                     fecha = taskModel.proximaFecha,
-                    proximaFecha = taskModel.proximaFecha + taskModel.margen
+                    proximaFecha = taskModel.proximaFecha + taskModel.margen,
+                    notificada = 0
                 )
             )
         }
@@ -124,7 +125,8 @@ class MyTaskTableViewModel @Inject constructor(
                 taskModel.copy(
                     id = id,
                     fecha = taskModel.proximaFecha,
-                    proximaFecha = taskModel.proximaFecha + taskModel.margen
+                    proximaFecha = taskModel.proximaFecha + taskModel.margen,
+                    notificada = 0
                 )
             )
         }

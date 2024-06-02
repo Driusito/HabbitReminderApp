@@ -145,7 +145,7 @@ fun ItemLista(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato
                     text = taskModel.nombre,
                     color = Color.White,
                     overflow = TextOverflow.Ellipsis,
-                    fontFamily = FontFamily(Font(R.font.lato_regular))
+                    fontFamily = FontFamily(Font(R.font.robotoblack))
                 )
             }
             Spacer(modifier = Modifier.weight(.5f))
@@ -172,7 +172,9 @@ fun ItemLista(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato
                     .padding(10.dp)
                     .weight(2.5f)
             ) {
-                Text(text = formattedTime)
+                Text(text = formattedTime, color = Color.White,
+                    overflow = TextOverflow.Ellipsis,
+                    fontFamily = FontFamily(Font(R.font.lato_bold)))
             }
         }
     }

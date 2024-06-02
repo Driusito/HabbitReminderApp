@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.habbitreminderapp.Core.Features.BotonConfirmar
-import com.example.habbitreminderapp.Core.Features.ChooseColorDialogue
+import com.example.habbitreminderapp.Core.Features.ChooseColorDialog
 import com.example.habbitreminderapp.Core.Features.EmojiSelector
 import com.example.habbitreminderapp.Core.Features.MyCalendar
 import com.example.habbitreminderapp.R
@@ -245,10 +245,12 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
                     )
                 }
                 if (showColorSelector) {
-                    ChooseColorDialogue(
+                    ChooseColorDialog(
                         mostrar = showColorSelector,
                         onColorSelected = { selectedColor ->
-                            newTaskScreenViewModel.selectColor(selectedColor)
+                            if (selectedColor != null) {
+                                newTaskScreenViewModel.selectColor(selectedColor)
+                            }
                         },
                         onDismiss = { showColorSelector = false }
                     )

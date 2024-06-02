@@ -19,7 +19,7 @@ fun AppNavigation(myTaskTableViewModel: MyTaskTableViewModel,newTaskScreenViewMo
     val navController= rememberNavController()
     NavHost(navController = navController, startDestination =AppScreen.welcomeScreen.route ){
         composable(route=AppScreen.welcomeScreen.route){
-            WelcomeScreen(navController)
+            WelcomeScreen(navController,myTaskTableViewModel,myTaskCalendarViewModel)
         }
         composable(route=AppScreen.newTaskScreen.route){
             NewTaskScreen(navController, newTaskScreenViewModel = newTaskScreenViewModel)
