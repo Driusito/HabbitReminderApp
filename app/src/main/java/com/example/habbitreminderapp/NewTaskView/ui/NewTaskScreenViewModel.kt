@@ -113,14 +113,15 @@ class NewTaskScreenViewModel @Inject constructor(private val addTaskUseCase: Add
 
 
     fun addTask(minutos: String, horas: String, dias: String) {
-        val margen = (minToLong(minutos) + hourToLong(horas) + dayToLong(dias))
+        var margen = (minToLong(minutos) + hourToLong(horas) + dayToLong(dias))
+        if (margen.toInt() ==0){margen=60}
         _task.value = TaskModel(
             id = 0,
             nombre = _nameTask.value ?: "",
             color = _colorTask.value ?: 0xFF36B1E4, // Valor por defecto en formato Long
             descripcion = _descriptionTask.value ?: "",
             fecha = _dateTask.value ?: 0L,
-            margen = margen ?: 60,
+            margen =margen,
             proximaFecha = _dateTask.value!! + margen,
             cumplida = 0,
             categoriaId = _categoryEmoji.value ?: " ",

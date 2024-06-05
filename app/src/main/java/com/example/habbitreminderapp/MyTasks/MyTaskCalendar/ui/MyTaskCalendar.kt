@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
@@ -180,36 +181,18 @@ fun CustomCalendar(myTaskCalendarViewModel: MyTaskCalendarViewModel) {
                     }
                 }
 
-                Text(text = "Tareas")
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, color = Color.Black)
-                ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Row(horizontalArrangement = Arrangement.SpaceAround) {
-                            Text(
-                                text = "Nombre",
-                                Modifier.weight(2.5f),
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "Hora de inicio",
-                                Modifier.weight(2f),
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(text = "Cumplida", fontWeight = FontWeight.Bold)
-                        }
+
+
                         listTask(task = listaTask, show = showDialog) {
                             myTaskCalendarViewModel.setDay(0)
                             showDialog = false // Ocultar el diálogo cuando se cierra
                         }
                     }
-                }
+
             }
         }
     }
-}
+
 
 @Composable
 fun EmptySpace(day: Int) {
@@ -311,6 +294,7 @@ fun listTask(task: List<TaskModel>, show: Boolean, onShow: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clip(RoundedCornerShape(20.dp))
                         .background(Color.White)
                         .height(500.dp)
                         .padding(horizontal = 16.dp)
@@ -335,8 +319,10 @@ fun listTask(task: List<TaskModel>, show: Boolean, onShow: () -> Unit) {
                                 )
                             }
                         }
-                        LazyColumn(
-                            contentPadding = PaddingValues(vertical = 5.dp),
+                        LazyColumn(modifier = Modifier.fillMaxSize().border(1.dp,MaterialTheme.colorScheme.primary,
+                            RoundedCornerShape(10.dp)
+                        ),
+                            contentPadding = PaddingValues(vertical = 5.dp, horizontal = 5.dp),
                             content = {
                                 items(task, key = { it.id }) { task ->
                                     ItemCalendario(task)
