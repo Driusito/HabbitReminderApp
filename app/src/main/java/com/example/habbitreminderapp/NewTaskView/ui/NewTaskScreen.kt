@@ -2,18 +2,22 @@ package com.example.habbitreminderapp.NewTaskView.ui
 
 import android.annotation.SuppressLint
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Colorize
@@ -28,6 +32,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -43,10 +48,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,6 +69,7 @@ import com.example.habbitreminderapp.R
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskScreenViewModel) {
+
 
     val nombreTarea: String by newTaskScreenViewModel.nameTask.observeAsState(initial = "")
     val descripcionTarea: String by newTaskScreenViewModel.descriptionTask.observeAsState(initial = "")
@@ -87,314 +95,290 @@ fun NewTaskScreen(navController: NavController, newTaskScreenViewModel: NewTaskS
         mutableStateOf(false)
     }
     var categorySelected by remember {
-        mutableStateOf("")
+        mutableStateOf("😀")
     }
-
-
 
     val abrirCalendario: Boolean by newTaskScreenViewModel.openCalendar.observeAsState(initial = false)
-
     var fecha by remember { mutableStateOf("") }
 
-    Column(Modifier.fillMaxSize()) {
-        TopAppBar(title = {
-            Text(
-                text = "Nueva Meta",
-                color = Color.White,
-                fontWeight = FontWeight.Bold, fontFamily = FontFamily(Font(R.font.lato_regular)),
-            )
-        }, navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "",
-                    tint = Color.White
-                )
-            }
-        }, colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Blue
-        )
-        )
-        Column(
-            Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .padding(20.dp)
+    val customFont = FontFamily(Font(R.font.lato_regular))
+    val primaryColor = Color(0xFF6200EA)
+    val secondaryColor = Color(0xFF03DAC5)
 
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .padding(20.dp)
+    ) {
+        Spacer(modifier = Modifier.weight(0.25f))
+
+        // Nombre de la tarea
+        OutlinedTextField(
+            value = nombreTarea,
+            onValueChange = { newTaskScreenViewModel.onNameChanged(it) },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(text = "Nombre de la tarea", color = primaryColor) },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = primaryColor,
+                unfocusedBorderColor = primaryColor
+            )
+        )
+
+        Spacer(modifier = Modifier.weight(0.25f))
+
+        // Categoría y color
+        Row(
+            Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
-            // Spacer(modifier = Modifier.weight(.1f))
-            Row(Modifier.fillMaxWidth()) {
-                Text(
-                    text = "Nombre",
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp, fontFamily = FontFamily(Font(R.font.lato_regular)),
-                    modifier = Modifier.weight(
-                        2f
-                    )
-                )
-                Spacer(modifier = Modifier.weight(.25f))
-                Text(
-                    text = "Categoria",
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp, fontFamily = FontFamily(Font(R.font.lato_regular)),
-                    modifier = Modifier.weight(
-                        2f
-                    )
-                )
-            }
-            Spacer(modifier = Modifier.weight(.25f))
-
-            Row(Modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = nombreTarea,
-                    onValueChange = { newTaskScreenViewModel.onNameChanged(it) },
-                    modifier = Modifier.weight(
-                        2f
-                    )
-                )
-                Spacer(modifier = Modifier.weight(.25f))
-
-                Box(modifier = Modifier
-                    .weight(2f)
-                    .align(Alignment.CenterVertically)) {
-                    OutlinedTextField( value = categorySelected,
-                        onValueChange = { categorySelected = it },
-                        enabled = false,
-                        readOnly = true,
-                        trailingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.KeyboardArrowDown,
-                                contentDescription = ""
-                            )
-                        }, colors = OutlinedTextFieldDefaults.colors(
-                            disabledContainerColor = Color.White
-                        ),
-                        modifier = Modifier
-                            .clickable { showCategory = true })
-                }
-                if (showCategory) {
-                    EmojiSelector(
-                        mostrar = showCategory,
-                        onEmojiSelected = { emoji ->
-                            newTaskScreenViewModel.selectCategory(emoji)
-                            categorySelected=emoji
-                        },
-                        onDismiss = { showCategory = false }
-                    )
-                }
-
-
-            }
-            Spacer(modifier = Modifier.weight(.25f))
-
-            Row(Modifier.fillMaxWidth()) {
-                Text(
-                    text = "Descripcion",
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp, fontFamily = FontFamily(Font(R.font.lato_regular)),
-                    modifier = Modifier.weight(
-                        2f
-                    )
-                )
-            }
-            Spacer(modifier = Modifier.weight(.25f))
-            OutlinedTextField(
-                value = descripcionTarea,
-                onValueChange = { newTaskScreenViewModel.onDescriptionChanged(it) },
-                modifier = Modifier.fillMaxWidth()
-
-            )
-            Spacer(modifier = Modifier.weight(.25f))
-
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "Fecha de inicio",
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp, fontFamily = FontFamily(Font(R.font.lato_regular)),
-                    modifier = Modifier.weight(
-                        2f
-                    )
-                )
-                Spacer(modifier = Modifier.weight(.05f))
-                Icon(imageVector = Icons.Default.DateRange, contentDescription = "")
-                Spacer(modifier = Modifier.weight(.45f))
-
-                Text(
-                    text = "Elige color",
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold, fontFamily = FontFamily(Font(R.font.lato_regular)),
-                    fontSize = 20.sp,
-                    modifier = Modifier.weight(
-                        1f
-                    )
-                )
-                Box(
-                    modifier = Modifier
-                        .size(40.dp) // Ajusta el tamaño del Box para hacerlo más grande
-                        .clickable { showColorSelector = true }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Colorize,
-                        contentDescription = "",
-                        modifier = Modifier.fillMaxSize(), // Ajusta el tamaño del Icon para que ocupe todo el Box
-                        tint = if (colorTarea != 0L) Color(colorTarea) else Color.Black
-                    )
-                }
-                if (showColorSelector) {
-                    ChooseColorDialog(
-                        mostrar = showColorSelector,
-                        onColorSelected = { selectedColor ->
-                            if (selectedColor != null) {
-                                newTaskScreenViewModel.selectColor(selectedColor)
-                            }
-                        },
-                        onDismiss = { showColorSelector = false }
-                    )
-                }
-
-                Spacer(modifier = Modifier.weight(.5f))
-
-            }
-            Spacer(modifier = Modifier.weight(.25f))
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                IconButton(onClick = {newTaskScreenViewModel.showCalendar(true) },Modifier.size(100.dp)) {
-                    Icon(imageVector = Icons.Default.CalendarMonth, contentDescription ="",Modifier.fillMaxSize() )
-                }
-
-
-            }
-            Spacer(modifier = Modifier.weight(.25f))
-
             Text(
-                text = "Fecha seleccionada: \n$fechaTarea ",
-                fontSize = 20.sp, fontFamily = FontFamily(Font(R.font.poetsenone_regular)),
+                text = "Selección de categoría",
+                modifier = Modifier.weight(4f),
+                fontSize = 16.sp,
+                color = primaryColor,
+                fontFamily = customFont
+            )
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-            )
+                    .weight(1f)
+                    .clickable { showCategory = true },
+                contentAlignment = Alignment.Center
+            ) {
+                OutlinedTextField(
+                    value = categorySelected,
+                    onValueChange = { categorySelected = it },
+                    enabled = false,
+                    readOnly = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledContainerColor = Color.White
+                    ),
+                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+                )
+            }
+        }
 
-            Spacer(modifier = Modifier.weight(.25f))
+        Spacer(modifier = Modifier.height(16.dp))
 
-
-            MyCalendar(abrirCalendario, newTaskScreenViewModel)
-
-
-
-
+        Row(
+            Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
             Text(
-                text = "Siguiente fecha cada:",
-                color = Color.Black,
+                text = "Elige color",
+                color = primaryColor,
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp, fontFamily = FontFamily(Font(R.font.lato_regular))
-
-                )
-            Spacer(modifier = Modifier.weight(.25f))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 10.dp)
+                fontFamily = customFont,
+                fontSize = 20.sp,
+                modifier = Modifier.weight(1f)
+            )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clickable { showColorSelector = true }
             ) {
-                OutlinedTextField(
-                    value = minutos,
-                    onValueChange = {
-                        minutos = it
-                        if (it.isNotEmpty())
-                            newTaskScreenViewModel.minToLong(it)
-
-
-                    },
-                    modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                Icon(
+                    imageVector = Icons.Default.Colorize,
+                    contentDescription = "",
+                    modifier = Modifier.fillMaxSize(),
+                    tint = if (colorTarea != 0L) Color(colorTarea) else primaryColor
                 )
-                Spacer(modifier = Modifier.weight(.5f))
-                Text(
-                    text = "Minutos", color = Color.Black,
-                    fontWeight = FontWeight.Bold, fontFamily = FontFamily(Font(R.font.lato_regular)),
-                    fontSize = 20.sp, modifier = Modifier.weight(1.5f)
-                )
-                Spacer(modifier = Modifier.weight(2.5f))
-
             }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 10.dp)
+        }
+
+        if (showCategory) {
+            EmojiSelector(
+                mostrar = showCategory,
+                onEmojiSelected = { emoji ->
+                    newTaskScreenViewModel.selectCategory(emoji)
+                    categorySelected = emoji
+                },
+                onDismiss = { showCategory = false }
+            )
+        }
+
+        if (showColorSelector) {
+            ChooseColorDialog(
+                mostrar = showColorSelector,
+                onColorSelected = { selectedColor ->
+                    if (selectedColor != null) {
+                        newTaskScreenViewModel.selectColor(selectedColor)
+                    }
+                },
+                onDismiss = { showColorSelector = false }
+            )
+        }
+
+        Spacer(modifier = Modifier.weight(0.25f))
+
+        // Descripción
+        Text(
+            text = "Descripción",
+            color = primaryColor,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            fontFamily = customFont,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = descripcionTarea,
+            onValueChange = { newTaskScreenViewModel.onDescriptionChanged(it) },
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = primaryColor,
+                unfocusedBorderColor = primaryColor
+            )
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Fecha de inicio
+        Row(
+            Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Fecha de inicio",
+                color = primaryColor,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                fontFamily = customFont,
+                modifier = Modifier.weight(2f)
+            )
+            Spacer(modifier = Modifier.weight(0.05f))
+            Icon(imageVector = Icons.Default.DateRange, contentDescription = "")
+            Spacer(modifier = Modifier.weight(0.45f))
+            Spacer(modifier = Modifier.weight(0.5f))
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Calendario
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            IconButton(
+                onClick = { newTaskScreenViewModel.showCalendar(true) },
+                Modifier.size(100.dp)
             ) {
-                OutlinedTextField(
-                    value = horas,
-                    onValueChange = {
-                        horas = it
-                        if (it.isNotEmpty())
-                            newTaskScreenViewModel.hourToLong(it)
-                        Log.i("Rango horas", it)
-                    },
-                    modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                Icon(
+                    imageVector = Icons.Default.CalendarMonth,
+                    contentDescription = "",
+                    Modifier.fillMaxSize()
                 )
-                Spacer(modifier = Modifier.weight(.5f))
-                Text(
-                    text = "Horas", color = Color.Black,
-                    fontWeight = FontWeight.Bold, fontFamily = FontFamily(Font(R.font.lato_regular)),
-                    fontSize = 20.sp, modifier = Modifier.weight(1.5f)
-                )
-                Spacer(modifier = Modifier.weight(2.5f))
-
             }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 10.dp)
-            ) {
-                OutlinedTextField(
-                    value = dias,
-                    onValueChange = {
-                        dias = it
-                        if (it.isNotEmpty())
-                            newTaskScreenViewModel.dayToLong(it)
-                        Log.i("Rango dias", it)
+        }
 
-                    },
-                    modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
-                )
-                Spacer(modifier = Modifier.weight(.5f))
-                Text(
-                    text = "Días", color = Color.Black,
-                    fontWeight = FontWeight.Bold, fontFamily = FontFamily(Font(R.font.lato_regular)),
-                    fontSize = 20.sp, modifier = Modifier.weight(1.5f)
-                )
-                Spacer(modifier = Modifier.weight(2.5f))
+        Spacer(modifier = Modifier.height(16.dp))
 
-            }
-            Spacer(modifier = Modifier.weight(.25f))
+        MyCalendar(abrirCalendario, newTaskScreenViewModel)
+        Text(text = "La fecha seleccionada es $fechaTarea")
 
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                FloatingActionButton(onClick = { newTaskScreenViewModel.addTask(minutos,horas, dias)
-                                               navController.popBackStack()}, modifier = Modifier.align(
-                    Alignment.BottomEnd)) {
-                    Icon(imageVector = Icons.Default.Done, contentDescription = "")
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Siguiente fecha cada:",
+            color = primaryColor,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            fontFamily = customFont
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Siguiente fecha cada
+        OutlinedTextField(
+            value = minutos,
+            onValueChange = {
+                minutos = it
+                if (it.isNotEmpty()) newTaskScreenViewModel.minToLong(it)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+            label = { Text("Minutos") },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = primaryColor,
+                unfocusedBorderColor = primaryColor
+            )
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = horas,
+            onValueChange = {
+                horas = it
+                if (it.isNotEmpty()) newTaskScreenViewModel.hourToLong(it)
+                Log.i("Rango horas", it)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+            label = { Text("Horas") },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = primaryColor,
+                unfocusedBorderColor = primaryColor
+            )
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = dias,
+            onValueChange = {
+                dias = it
+                if (it.isNotEmpty()) newTaskScreenViewModel.dayToLong(it)
+                Log.i("Rango días", it)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+            label = { Text("Días") },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = primaryColor,
+                unfocusedBorderColor = primaryColor
+            )
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Botón de confirmar
+
+
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+    val context= LocalContext.current
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomEnd) {
+        FloatingActionButton(
+            onClick = {
+                if (newTaskScreenViewModel.camposVacios()) {
+                    // Mostrar un mensaje de error o tomar alguna acción
+                    // Por ejemplo, mostrar un Toast
+                    Toast.makeText(context, "Por favor, complete todos los campos", Toast.LENGTH_SHORT).show()
+                }
+                else if (newTaskScreenViewModel.fechaIncorrecta()){
+                    Toast.makeText(context, "La fecha no puede ser anterior a la actual", Toast.LENGTH_SHORT).show()
 
                 }
-
-            }
-            Spacer(modifier = Modifier.weight(.25f))
-
-
+                    else {
+                    newTaskScreenViewModel.addTask(minutos, horas, dias)
+                    navController.popBackStack()
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(15.dp)
+        ) {
+            Icon(imageVector = Icons.Default.Done, contentDescription = "")
         }
     }
-
-
 }
-
 @Composable
 fun MyDropDownMenu(): String {
     var selectedText by remember { mutableStateOf("") }
     var clicked by remember { mutableStateOf(false) }
     val lista = listOf("Ejercicio", "Ocio", "Salud")
 
-    OutlinedTextField(value = selectedText,
+    OutlinedTextField(
+        value = selectedText,
         onValueChange = { selectedText = it },
         enabled = false,
         readOnly = true,
@@ -404,22 +388,25 @@ fun MyDropDownMenu(): String {
                 contentDescription = ""
             )
         },
-        modifier = Modifier
-            .clickable { clicked = true }
+        modifier = Modifier.clickable { clicked = true }
     )
     DropdownMenu(
         expanded = clicked, onDismissRequest = { clicked = false },
     ) {
         lista.forEach { texto ->
-            DropdownMenuItem(trailingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Face,
-                    contentDescription = " "
-                )
-            }, text = { Text(text = texto) }, onClick = {
-                clicked = false
-                selectedText = texto
-            })
+            DropdownMenuItem(
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Face,
+                        contentDescription = " "
+                    )
+                },
+                text = { Text(text = texto) },
+                onClick = {
+                    clicked = false
+                    selectedText = texto
+                }
+            )
         }
     }
     return selectedText

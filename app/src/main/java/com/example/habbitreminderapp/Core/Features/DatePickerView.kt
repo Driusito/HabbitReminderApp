@@ -22,11 +22,14 @@ import androidx.compose.ui.unit.dp
 import com.example.habbitreminderapp.NewTaskView.ui.NewTaskScreenViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyCalendar(show:Boolean, newTaskScreenViewModel: NewTaskScreenViewModel): String {
-    val state = rememberDatePickerState()
+fun MyCalendar(show: Boolean, newTaskScreenViewModel: NewTaskScreenViewModel): String {
+    // Obtener la fecha actual
+    val currentDate = remember { System.currentTimeMillis() }
+    val state = rememberDatePickerState(initialSelectedDateMillis = currentDate)
     val showed: Boolean by newTaskScreenViewModel.openCalendar.observeAsState(initial = show)
     var mostrarHora by remember { mutableStateOf(false) }
     var hora by remember { mutableStateOf("") }
@@ -41,7 +44,6 @@ fun MyCalendar(show:Boolean, newTaskScreenViewModel: NewTaskScreenViewModel): St
             confirmButton = {
                 Button(onClick = {
                     mostrarHora = true
-                    // newTaskScreenViewModel.showCalendar(false)
                 }) {
                     Text(text = "Confirmar")
                 }
@@ -56,13 +58,12 @@ fun MyCalendar(show:Boolean, newTaskScreenViewModel: NewTaskScreenViewModel): St
                     todayContentColor = Color.Green,
                     selectedDayContainerColor = Color(64, 141, 201, 255)
                 ),
-                dateValidator = {date ->
-                    date > System.currentTimeMillis()- 86400000
+                dateValidator = { date ->
+                    date > System.currentTimeMillis() - 86400000
                 }
             )
         }
     }
-
 
     if (mostrarHora) {
         // Mostrar diálogo de selección de tiempo
@@ -74,7 +75,7 @@ fun MyCalendar(show:Boolean, newTaskScreenViewModel: NewTaskScreenViewModel): St
             // Formatear la fecha como una cadena de texto
             val selectedDateMillis = state.selectedDateMillis
             val selectedDate = selectedDateMillis?.let { Date(it) }
-            val dateFormatter = SimpleDateFormat("dd/MM/yyyy")
+            val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale("es", "ES"))
             fechaSeleccionada = selectedDate?.let { dateFormatter.format(it) } + " " + hora
             Log.i("CalendarioSelected", fechaSeleccionada)
             newTaskScreenViewModel.stringToLong(fechaSeleccionada)
@@ -96,4 +97,3 @@ fun MyCalendar(show:Boolean, newTaskScreenViewModel: NewTaskScreenViewModel): St
 
     return fechaSeleccionada
 }
-

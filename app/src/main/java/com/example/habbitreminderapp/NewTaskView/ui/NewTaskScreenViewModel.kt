@@ -120,7 +120,7 @@ class NewTaskScreenViewModel @Inject constructor(private val addTaskUseCase: Add
             color = _colorTask.value ?: 0xFF36B1E4, // Valor por defecto en formato Long
             descripcion = _descriptionTask.value ?: "",
             fecha = _dateTask.value ?: 0L,
-            margen = margen,
+            margen = margen ?: 60,
             proximaFecha = _dateTask.value!! + margen,
             cumplida = 0,
             categoriaId = _categoryEmoji.value ?: " ",
@@ -145,5 +145,11 @@ class NewTaskScreenViewModel @Inject constructor(private val addTaskUseCase: Add
         _categoryEmoji.value=emoji
     }
 
+    fun camposVacios(): Boolean {
+        return _nameTask.value?.isBlank() ?: false   || _dateTask.value==null
+    }
 
+    fun fechaIncorrecta(): Boolean {
+        return  _dateTask.value!! <System.currentTimeMillis()/1000
+    }
 }
