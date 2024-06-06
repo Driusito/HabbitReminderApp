@@ -1,12 +1,19 @@
 package com.example.habbitreminderapp.MyTasks.MyTaskTable.ui
 
+import NotificationWorker
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.example.habbitreminderapp.Domain.AddTaskUseCase
 import com.example.habbitreminderapp.Domain.DeleteTaskUseCase
 import com.example.habbitreminderapp.Domain.GetLastIdUseCase
@@ -20,6 +27,7 @@ import com.example.habbitreminderapp.HabbitReminderApp
 import com.example.habbitreminderapp.MainActivity
 import com.example.habbitreminderapp.Model.data.TaskModel
 import com.example.habbitreminderapp.R
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,6 +37,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -72,7 +81,7 @@ class MyTaskTableViewModel @Inject constructor(
         val notification = NotificationCompat.Builder(context, HabbitReminderApp.CHANNEL_ID)
             .setContentTitle(taskModel.nombre)
             .setContentText(taskModel.descripcion)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.notas)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)  // Set the PendingIntent
             .build()
@@ -94,6 +103,20 @@ class MyTaskTableViewModel @Inject constructor(
             setNotificatedUseCase(id)
 
         }
+    }
+
+    fun scheduleNotification(context: Context, taskModel: TaskModel, delayInMillis: Long) {
+        val taskModelJson = Gson().toJson(taskModel)
+        val data = workDataOf("taskModelJson" to taskModelJson)
+
+        Log.d("NotificationWorker", "Scheduling notification for task: ${taskModel.nombre} with delay: $delayInMillis ms")
+
+        val notificationWorkRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
+            .setInitialDelay(delayInMillis, TimeUnit.MILLISECONDS)
+            .setInputData(data)
+            .build()
+
+        WorkManager.getInstance(context).enqueue(notificationWorkRequest)
     }
 
     fun addTask(taskModel: TaskModel) {

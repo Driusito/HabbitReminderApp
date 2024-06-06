@@ -89,9 +89,11 @@ fun ItemLista(taskModel: TaskModel, viewModel: MyTaskTableViewModel, tipoFormato
         }
     }
     if (!comenzar && currentTimestampSeconds >= taskModel.fecha && currentTimestampSeconds <= taskModel.proximaFecha &&taskModel.notificada==0) {
-        viewModel.sendNotification(context = context, taskModel)
+        //viewModel.sendNotification(context = context, taskModel)
+        val delayInMillis = ((taskModel.proximaFecha * 1000) - System.currentTimeMillis()).coerceAtLeast(0L)
         Log.i("id",taskModel.id.toString())
-        viewModel.setNotificated(taskModel.id)
+        //viewModel.scheduleNotification(context, taskModel,delayInMillis/1000 )
+        //viewModel.setNotificated(taskModel.id)
         comenzar = true
     }
     val icon=if(currentTimestampSeconds >= taskModel.fecha&&currentTimestampSeconds<taskModel.proximaFecha){Icons.Default.LockOpen}else if(currentTimestampSeconds>=taskModel.proximaFecha){Icons.Default.Cancel}
@@ -254,7 +256,7 @@ fun Pagina(
                                 Log.i("Cronologia", "Soy ${it.toString()}")
 
                             }
-                        },
+                        }, myTaskTableViewModel = myTaskTableViewModel,
                         content = { ItemLista(task, myTaskTableViewModel, 0) }
                     )
                 }
@@ -402,6 +404,7 @@ fun <T> SwipeToDeleteOrCompleteItem(
     timeToPass: Long,
     timeToDone: Long, // Parámtero que contiene la fecha límite para permitir el swipe a la derecha
     animationDuration: Int = 500,
+    myTaskTableViewModel: MyTaskTableViewModel,
     content: @Composable (T) -> Unit
 ) {
     var currentTimestampSeconds by remember { mutableStateOf(System.currentTimeMillis() / 1000) }
@@ -418,6 +421,9 @@ fun <T> SwipeToDeleteOrCompleteItem(
     var isPassed by remember {
         mutableStateOf(false)
     }
+    var isScheduled by remember {
+        mutableStateOf(false)
+    }
 
 //    if (currentTimestampSeconds >= timeToPass && !isPassed) {
 //        onPassed(item)
@@ -430,6 +436,19 @@ fun <T> SwipeToDeleteOrCompleteItem(
         setOf(DismissDirection.EndToStart) // Only allow swipe to delete
     }
     val context = LocalContext.current
+
+    val currentTimestampMillis = System.currentTimeMillis()
+
+    if (item is TaskModel) {
+        if (!isScheduled && item.notificada == 0 && currentTimestampMillis <= item.fecha * 1000) {
+            val delayInMillis = ((item.fecha * 1000) - currentTimestampMillis).coerceAtLeast(0L)
+            myTaskTableViewModel.scheduleNotification(context, item, delayInMillis)
+            myTaskTableViewModel.setNotificated(item.id)
+            isScheduled = true
+        }
+    }
+
+
     val state = rememberDismissState(
         confirmValueChange = { value ->
             when (value) {

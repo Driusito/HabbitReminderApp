@@ -89,8 +89,9 @@ dependencies {
 
     //Emojis
     //implementation ("com.vanniktech:emoji-twitter:0.7.0")
-
-
+    // WorkManager dependency
+    implementation ("androidx.work:work-runtime-ktx:2.7.1")
+    implementation ("com.google.code.gson:gson:2.8.8")
 //Swipe
     implementation ("me.saket.swipe:swipe:1.1.1")
 
