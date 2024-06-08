@@ -14,6 +14,7 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.example.habbitreminderapp.Core.Features.getWorkRequestId
 import com.example.habbitreminderapp.Domain.AddTaskUseCase
 import com.example.habbitreminderapp.Domain.DeleteTaskUseCase
 import com.example.habbitreminderapp.Domain.GetLastIdUseCase
@@ -37,6 +38,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -105,7 +107,7 @@ class MyTaskTableViewModel @Inject constructor(
         }
     }
 
-    fun scheduleNotification(context: Context, taskModel: TaskModel, delayInMillis: Long) {
+    fun scheduleNotification(context: Context, taskModel: TaskModel, delayInMillis: Long): UUID {
         val taskModelJson = Gson().toJson(taskModel)
         val data = workDataOf("taskModelJson" to taskModelJson)
 
@@ -117,6 +119,18 @@ class MyTaskTableViewModel @Inject constructor(
             .build()
 
         WorkManager.getInstance(context).enqueue(notificationWorkRequest)
+
+        return notificationWorkRequest.id
+    }
+    fun cancelNotification(context: Context, taskModelId: Int) {
+        val workRequestId = getWorkRequestId(taskModelId,context) // Recupera el ID del WorkRequest
+
+        if (workRequestId != null) {
+            WorkManager.getInstance(context).cancelWorkById(workRequestId)
+            Log.d("NotificationWorker", "Notification cancelled for task ID: $taskModelId")
+        } else {
+            Log.d("NotificationWorker", "No WorkRequest ID found for task ID: $taskModelId")
+        }
     }
 
     fun addTask(taskModel: TaskModel) {

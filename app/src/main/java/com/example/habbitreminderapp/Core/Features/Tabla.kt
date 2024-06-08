@@ -1,6 +1,7 @@
 package com.example.habbitreminderapp.Core.Features
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -65,6 +66,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 
@@ -193,6 +195,7 @@ fun Pagina(
 ) {
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    val context= LocalContext.current
     Log.d("Pagina", "tasksToday: ${tasksToday.size}, tasksTomorrow: ${tasksTomorrow.size}, tasksComing: ${tasksComing.size}")
     var numero by remember {
         mutableStateOf(0)
@@ -236,6 +239,7 @@ fun Pagina(
                         onDelete = {
                             isRemoved = true
                             coroutineScope.launch {
+                                myTaskTableViewModel.cancelNotification(context = context, taskModelId = task.id)
                                 myTaskTableViewModel.deleteTask(task)
                             }
                         },
@@ -442,9 +446,11 @@ fun <T> SwipeToDeleteOrCompleteItem(
     if (item is TaskModel) {
         if (!isScheduled && item.notificada == 0 && currentTimestampMillis <= item.fecha * 1000) {
             val delayInMillis = ((item.fecha * 1000) - currentTimestampMillis).coerceAtLeast(0L)
-            myTaskTableViewModel.scheduleNotification(context, item, delayInMillis)
+            val workRequestId = myTaskTableViewModel.scheduleNotification(context, item, delayInMillis)
             myTaskTableViewModel.setNotificated(item.id)
             isScheduled = true
+
+            saveWorkRequestId(item.id, workRequestId, context = context)
         }
     }
 
@@ -509,4 +515,18 @@ fun <T> SwipeToDeleteOrCompleteItem(
             directions = dismissDirections
         )
     }
+}
+
+fun saveWorkRequestId(taskModelId: Int, workRequestId: UUID,context:Context) {
+    val sharedPreferences = context.getSharedPreferences("NotificationPrefs", Context.MODE_PRIVATE)
+    with(sharedPreferences.edit()) {
+        putString("WorkRequestId_$taskModelId", workRequestId.toString())
+        apply()
+    }
+}
+
+fun getWorkRequestId(taskModelId: Int,context: Context): UUID? {
+    val sharedPreferences = context.getSharedPreferences("NotificationPrefs", Context.MODE_PRIVATE)
+    val workRequestIdString = sharedPreferences.getString("WorkRequestId_$taskModelId", null)
+    return if (workRequestIdString != null) UUID.fromString(workRequestIdString) else null
 }
