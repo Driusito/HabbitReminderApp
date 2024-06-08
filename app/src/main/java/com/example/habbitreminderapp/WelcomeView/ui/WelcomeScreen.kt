@@ -70,8 +70,8 @@ fun WelcomeScreen(
                         ),
                         MenuItem(
                             "2",
-                            "Mis metas",
-                            "Mis metas",
+                            "Configuracion",
+                            "Configuracion",
                             icon = Icons.Default.Settings,
                         )
                     ),
