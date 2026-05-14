@@ -38,11 +38,12 @@ El proyecto utiliza las herramientas más modernas recomendadas por Google para 
 1. Clona el repositorio:
    ```bash
    git clone [https://github.com/Driusito/HabbitReminderApp.git](https://github.com/Driusito/HabbitReminderApp.git)
-2.Abre el proyecto en Android Studio.
+   
+2. Abre el proyecto en Android Studio.
 
-3.Sincroniza el proyecto con los archivos de Gradle.
+3. Sincroniza el proyecto con los archivos de Gradle.
 
-4.Ejecuta la aplicación en tu dispositivo o emulador.
+4. Ejecuta la aplicación en tu dispositivo o emulador.
 
 ## 📂 Estructura del Proyecto
 El proyecto sigue una estructura limpia organizada por capas:
@@ -55,7 +56,7 @@ di: Configuración de los módulos de Inyección de Dependencias con Hilt.
 
 worker: Lógica para las notificaciones programadas con WorkManager.
 
-##👤 Autor
+## 👤 Autor
 Andrés Jesús Jurado Suárez - GitHub
 
 Proyecto desarrollado para el módulo de Proyecto Integrado - IES Torre del Rey (Promoción 2023/2024)
